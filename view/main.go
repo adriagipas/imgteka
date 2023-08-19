@@ -23,42 +23,20 @@
 package view
 
 import (
-  "fmt"
-  "os"
-  
-  "github.com/diamondburned/gotk4/pkg/gtk/v4"
-  "github.com/diamondburned/gotk4/pkg/gio/v2"
+  "fyne.io/fyne/v2/app"
 )
 
 
-func startup ( app *gtk.Application ) {
-  window:= gtk.NewApplicationWindow ( app )
-  window.SetTitle ( "imgteka" )
-  window.SetChild ( gtk.NewLabel ( "Prova!" ) )
-  window.SetDefaultSize ( 400, 300 )
-  window.Show ()
-}
-
-
-func activate ( app *gtk.Application ) {
-  app.ActiveWindow ().Present ()
-}
-
-
 func Run() error {
-  
+
   // Crea
-  app:= gtk.NewApplication("com.github.adriagipas.imgteka",
-    gio.ApplicationFlagsNone)
-  app.ConnectStartup ( func() { startup ( app ) } )
-  app.ConnectActivate ( func() { activate ( app ) } )
+  a:= app.New ()
+  win:= a.NewWindow ( "imgteka" )
   
   // Executa
-  if ecode:= app.Run ( os.Args ); ecode > 0 {
-    return fmt.Errorf ( "Unable to run GTK application (Error Code: %d)",
-      ecode )
-  }
-
+  win.SetContent ( GetList () )
+  win.ShowAndRun ()
+  
   return nil
   
 }
