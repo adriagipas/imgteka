@@ -34,7 +34,7 @@ func Run() error {
   win:= a.NewWindow ( "imgteka" )
   
   // Executa
-  win.SetContent ( GetList () )
+  win.SetContent ( GetList ( newFakeDataModel () ) )
   win.ShowAndRun ()
   
   return nil

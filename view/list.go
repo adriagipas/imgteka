@@ -23,9 +23,34 @@
 package view
 
 import (
+  "fmt"
+  "image/color"
+  "log"
+  "strconv"
+  
   "fyne.io/fyne/v2"
+  "fyne.io/fyne/v2/canvas"
+  "fyne.io/fyne/v2/container"
   "fyne.io/fyne/v2/widget"
 )
+
+
+
+
+/*************/
+/* CONSTANTS */
+/*************/
+
+const FILE_VIEW_TEMPLATE string= `
+#### %s
+
+- ***Tipus:*** *%s*
+
+- ***md5:*** *%s*
+
+- ***sha1:*** *%s*
+
+- ***Grandària:*** *%s*`
 
 
 
@@ -34,30 +59,171 @@ import (
 /* FACTORY */
 /***********/
 
-type _Factory struct {
+func int64_to_tnid(ids []int64,pref string) []widget.TreeNodeID {
+  ret:= make([]widget.TreeNodeID,len(ids))
+  for i:= 0; i < len(ids); i++ {
+    ret[i]= pref + strconv.FormatInt ( ids[i], 10 )
+  }
+  return ret
 }
 
-func (self *_Factory) childUIDs(id widget.TreeNodeID) []widget.TreeNodeID {
-  switch id {
-  case "":
-    return []widget.TreeNodeID{"a", "b", "c"}
-  case "a":
-    return []widget.TreeNodeID{"a1", "a2"}
+
+func size_to_string ( size int64 ) string {
+
+  var ret string
+  
+  // Bytes
+  if size < 1024 {
+    ret= fmt.Sprintf ( "%d B" )
+  } else if size < 1024*1024 {
+    ret= fmt.Sprintf ( "%d B (%.1f KB)", size, float32(size)/1024.0 )
+  } else if size < 1024*1024*1024 {
+    ret= fmt.Sprintf ( "%d B (%.1f MB)", size, float32(size)/(1024.0*1024.0) )
+  } else {
+    ret= fmt.Sprintf ( "%d B (%.1f GB)",
+      size, float32(size)/(1024.0*1024.0*1024) )
   }
-  return []string{}
+  
+  return ret
+  
+} // end size_to_string
+
+
+func newPlatformLabel(idname string, mcolor color.Color) fyne.CanvasObject {
+
+  /*
+  text:= canvas.NewText ( " "+idname+" ", mcolor )
+  text.Alignment= fyne.TextAlignCenter
+  text.TextStyle= fyne.TextStyle{Bold: true}
+  text.TextSize= 10.0
+  rect:= canvas.NewCircle ( color.Transparent )
+  rect.StrokeColor= mcolor
+  rect.StrokeWidth= 2
+  ret:= container.NewMax ( rect, text )
+  */
+
+  text:= canvas.NewText ( idname, color.Black )
+  text.Alignment= fyne.TextAlignCenter
+  text.TextStyle= fyne.TextStyle{Bold: true}
+  text.TextSize= 10.0
+  rect:= canvas.NewRectangle ( mcolor )
+  rect.SetMinSize ( fyne.Size{7.5,1.0} )
+  
+  ret:= container.NewHBox ( rect, text )
+  
+  return ret
+  
+} // end newPlatformLabel
+
+
+func newEntryView() fyne.CanvasObject {
+
+  // Plataforma
+  plat:= newPlatformLabel ( "BLO", color.Black )
+  
+  // Nom
+  name:= widget.NewLabel ( "NAME" )
+  
+  return container.NewHBox ( plat, name )
+  
+} // end newEntryView
+
+
+func newFileView() fyne.CanvasObject {
+
+  // Descripció
+  text:= fmt.Sprintf ( FILE_VIEW_TEMPLATE, "Blo", "Blo",
+    "Blo", "Blo", size_to_string ( 999 ) )
+  desc:= widget.NewRichTextFromMarkdown ( text )
+  
+  return container.NewMax ( desc )
+  
+} // end newFileView
+
+
+type _Factory struct {
+  model           DataModel
+  platform_labels map[int]fyne.CanvasObject
+}
+
+
+func newFactory(model DataModel) *_Factory {
+  plat:= make(map[int]fyne.CanvasObject)
+  ret:= _Factory{model,plat}
+  return &ret
+}
+
+
+func (self *_Factory) getPlatformLabel(id int) fyne.CanvasObject {
+
+  // Busca si ja el tenim
+  ret,ok:= self.platform_labels[id]
+  if ok { return ret }
+
+  // Crea el valor
+  idname,color:= self.model.GetPlatformHints ( id )
+  ret= newPlatformLabel ( idname, color )
+  self.platform_labels[id]= ret
+
+  return ret
+  
+} // end getPlarformLabel
+
+
+func (self *_Factory) setEntryView (
+  o fyne.CanvasObject,
+  e Entry,
+) {
+
+  cont:= o.(*fyne.Container)
+
+  // Etiqueta plataforma
+  cont.Objects[0]= self.getPlatformLabel ( e.GetPlatformID () )
+  
+  // Nom
+  name:= cont.Objects[1].(*widget.Label)
+  name.SetText ( e.GetName () )
+  
+} // end setEntryView
+
+
+func (self *_Factory) setFileView (o fyne.CanvasObject, f File) {
+
+  cont:= o.(*fyne.Container)
+
+  // Descripció
+  text:= fmt.Sprintf ( FILE_VIEW_TEMPLATE,
+    f.GetName (), f.GetType (), f.GetMD5 (), f.GetSHA1 (),
+    size_to_string ( f.GetSize () ) )
+  cont.Objects[0]= widget.NewRichTextFromMarkdown ( text )
+  
+} // end setFileView
+
+func (self *_Factory) childUIDs(id widget.TreeNodeID) []widget.TreeNodeID {
+  if id == "" {
+    return int64_to_tnid ( self.model.RootEntries (), "E" )
+  } else if id[0] == 'E' {
+    id,err:= strconv.ParseInt ( id[1:], 10, 64 )
+    if err != nil { log.Fatal ( err ) }
+    e:= self.model.GetEntry ( id )
+    return int64_to_tnid ( e.GetFileIDs (), "F" )
+  } else {
+    return []string{}
+  }
 }
 
 
 func (self *_Factory) isBranch(id widget.TreeNodeID) bool {
-  return id == "" || id == "a"
+  return id == "" || id[0] == 'E'
 }
 
 
 func (self *_Factory) create(branch bool) fyne.CanvasObject {
   if branch {
-    return widget.NewLabel("Branch template")
+    return newEntryView ()
+  } else {
+    return newFileView ()
   }
-  return widget.NewLabel("Leaf template")
 }
 
 
@@ -66,12 +232,18 @@ func (self *_Factory) update(
   branch bool,
   o      fyne.CanvasObject,
 ) {
-  text := id
   if branch {
-    text += " (branch)"
+    id,err:= strconv.ParseInt ( id[1:], 10, 64 )
+    if err != nil { log.Fatal ( err ) }
+    e:= self.model.GetEntry ( id )
+    self.setEntryView ( o, e )
+  } else {
+    id,err:= strconv.ParseInt ( id[1:], 10, 64 )
+    if err != nil { log.Fatal ( err ) }
+    f:= self.model.GetFile ( id )
+    self.setFileView ( o, f )
   }
-  o.(*widget.Label).SetText(text)
-}
+} // end update
 
 
 
@@ -80,9 +252,9 @@ func (self *_Factory) update(
 /* FUNCIONS PÚBLIQUES */
 /**********************/
 
-func GetList() fyne.CanvasObject {
-
-  f:= _Factory{}
+func GetList ( model DataModel ) fyne.CanvasObject {
+  
+  f:= newFactory ( model )
   tree := widget.NewTree(
     // childUIDs
 		func(id widget.TreeNodeID) []widget.TreeNodeID {
@@ -102,5 +274,5 @@ func GetList() fyne.CanvasObject {
 		})
   
   return tree
-}
-
+  
+} // end GetList
