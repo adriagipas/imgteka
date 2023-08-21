@@ -24,7 +24,10 @@
 package view
 
 import (
+  "image"
   "image/color"
+  "image/png"
+  "os"
 )
 
 
@@ -60,6 +63,9 @@ type Entry interface {
   // Torna els identificadors dels fitxers d'aquesta entrada. Són
   // globals, però diferents als de les entrades.
   GetFileIDs() []int64
+
+  // Torna la imatge de la portada. Pot tornar nil
+  GetCover () image.Image
   
 }
 
@@ -119,6 +125,7 @@ type _FakeEntry struct {
   name     string
   pid      int
   file_ids []int64
+  cover    string // Pot ser nil
 }
 
 func (self *_FakeEntry) GetName() string {
@@ -131,6 +138,15 @@ func (self *_FakeEntry) GetPlatformID() int {
 
 func (self *_FakeEntry) GetFileIDs() []int64 {
   return self.file_ids
+}
+
+func (self *_FakeEntry) GetCover() image.Image {
+  f,err:= os.Open ( self.cover )
+  if err != nil { return nil }
+  ret,err:= png.Decode ( f )
+  if err != nil { return nil }
+  f.Close ()
+  return ret
 }
 
 type _FakePlatformHint struct {
@@ -171,9 +187,11 @@ func newFakeDataModel() *_FakeDataModel {
       _FakeEntry{
         name:"Thunder Force IV",pid:0,
         file_ids: []int64{0},
+        cover: "blo",        
       },
         _FakeEntry{name:"Mortal Kombat",pid:1,
           file_ids: []int64 {1,2,3,4},
+          cover: "/home/adria/COLJOCS/DOS/Mortal Kombat/screenshots/s1.png",
         },
       },
       files: []_FakeFile {

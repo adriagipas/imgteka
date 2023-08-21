@@ -90,18 +90,7 @@ func size_to_string ( size int64 ) string {
 
 
 func newPlatformLabel(idname string, mcolor color.Color) fyne.CanvasObject {
-
-  /*
-  text:= canvas.NewText ( " "+idname+" ", mcolor )
-  text.Alignment= fyne.TextAlignCenter
-  text.TextStyle= fyne.TextStyle{Bold: true}
-  text.TextSize= 10.0
-  rect:= canvas.NewCircle ( color.Transparent )
-  rect.StrokeColor= mcolor
-  rect.StrokeWidth= 2
-  ret:= container.NewMax ( rect, text )
-  */
-
+  
   text:= canvas.NewText ( idname, color.Black )
   text.Alignment= fyne.TextAlignCenter
   text.TextStyle= fyne.TextStyle{Bold: true}
@@ -143,13 +132,17 @@ func newFileView() fyne.CanvasObject {
 
 type _Factory struct {
   model           DataModel
+  dv              *DetailsViewer
   platform_labels map[int]fyne.CanvasObject
 }
 
 
-func newFactory(model DataModel) *_Factory {
+func newFactory (
+  model DataModel,
+  dv    *DetailsViewer,
+) *_Factory {
   plat:= make(map[int]fyne.CanvasObject)
-  ret:= _Factory{model,plat}
+  ret:= _Factory{model,dv,plat}
   return &ret
 }
 
@@ -246,33 +239,55 @@ func (self *_Factory) update(
 } // end update
 
 
+func (self *_Factory) onSelected ( id widget.TreeNodeID ) {
+  if id[0] == 'E' { // Entrada
+    id,err:= strconv.ParseInt ( id[1:], 10, 64 )
+    if err != nil { log.Fatal ( err ) }
+    e:= self.model.GetEntry ( id )
+    self.dv.ViewEntry ( e )
+  } else if id[0] == 'F' { // Fitxer
+    id,err:= strconv.ParseInt ( id[1:], 10, 64 )
+    if err != nil { log.Fatal ( err ) }
+    f:= self.model.GetFile ( id )
+    self.dv.ViewFile ( f )
+  } else { // ¿¿??
+    log.Fatal ( "list.go - onSelected - WTF!!!" )
+  }
+} // onSelected
 
 
-/**********************/
-/* FUNCIONS PÚBLIQUES */
-/**********************/
 
-func GetList ( model DataModel ) fyne.CanvasObject {
+
+/****************/
+/* PART PÚBLICA */
+/****************/
+
+type List struct {
+  widget.Tree
+}
+
+
+func NewList ( model DataModel, dv *DetailsViewer ) *List {
+
+  f:= newFactory ( model, dv )
+  ret:= &List{}
+  ret.ExtendBaseWidget ( ret )
+  ret.ChildUIDs= func(id widget.TreeNodeID) []widget.TreeNodeID {
+    return f.childUIDs ( id )
+  }
+  ret.IsBranch= func(id widget.TreeNodeID) bool {
+    return f.isBranch ( id )
+  }
+  ret.CreateNode= func(branch bool) fyne.CanvasObject {
+    return f.create ( branch )
+  }
+  ret.UpdateNode= func(id widget.TreeNodeID, branch bool, o fyne.CanvasObject) {
+    f.update ( id, branch, o )
+  }
+  ret.OnSelected= func(id widget.TreeNodeID) {
+    f.onSelected ( id )
+  }
   
-  f:= newFactory ( model )
-  tree := widget.NewTree(
-    // childUIDs
-		func(id widget.TreeNodeID) []widget.TreeNodeID {
-      return f.childUIDs(id)
-		},
-    // isBranch
-		func(id widget.TreeNodeID) bool {
-			return f.isBranch(id)
-		},
-    // create
-		func(branch bool) fyne.CanvasObject {
-			return f.create(branch)
-		},
-    // update
-		func(id widget.TreeNodeID, branch bool, o fyne.CanvasObject) {
-			f.update(id,branch,o)
-		})
-  
-  return tree
+  return ret
   
 } // end GetList

@@ -24,6 +24,7 @@ package view
 
 import (
   "fyne.io/fyne/v2/app"
+  "fyne.io/fyne/v2/container"
 )
 
 
@@ -32,9 +33,15 @@ func Run() error {
   // Crea
   a:= app.New ()
   win:= a.NewWindow ( "imgteka" )
+
+  // Construeix elements
+  model:= newFakeDataModel ()
+  dv:= NewDetailsViewer ( model )
+  list:= NewList ( model, dv )
+  split:= container.NewHSplit ( list, dv.GetCanvas () )
   
   // Executa
-  win.SetContent ( GetList ( newFakeDataModel () ) )
+  win.SetContent ( split )
   win.ShowAndRun ()
   
   return nil
