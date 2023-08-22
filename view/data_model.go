@@ -47,15 +47,6 @@ type File interface {
   // exemple Diquet 3 1/2
   GetType() string
 
-  // Torna el MD5  
-  GetMD5() string
-
-  // Torna el SHA1
-  GetSHA1() string
-
-  // Torna la grandària en bytes
-  GetSize() int64
-
   // Torna metadades associades a aquest fitxer
   GetMetadata() []StringPair
   

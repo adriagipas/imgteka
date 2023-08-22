@@ -41,16 +41,9 @@ import (
 /* CONSTANTS */
 /*************/
 
-const FILE_VIEW_TEMPLATE string= `
-#### %s
+const FILE_VIEW_TEMPLATE string= `**%s**
 
-- ***Tipus:*** *%s*
-
-- ***md5:*** *%s*
-
-- ***sha1:*** *%s*
-
-- ***Grandària:*** *%s*`
+>*%s*`
 
 
 
@@ -58,6 +51,7 @@ const FILE_VIEW_TEMPLATE string= `
 /***********/
 /* FACTORY */
 /***********/
+
 
 func int64_to_tnid(ids []int64,pref string) []widget.TreeNodeID {
   ret:= make([]widget.TreeNodeID,len(ids))
@@ -67,7 +61,7 @@ func int64_to_tnid(ids []int64,pref string) []widget.TreeNodeID {
   return ret
 }
 
-
+/*
 func size_to_string ( size int64 ) string {
 
   var ret string
@@ -87,7 +81,7 @@ func size_to_string ( size int64 ) string {
   return ret
   
 } // end size_to_string
-
+*/
 
 func newPlatformLabel(idname string, mcolor color.Color) fyne.CanvasObject {
   
@@ -121,8 +115,7 @@ func newEntryView() fyne.CanvasObject {
 func newFileView() fyne.CanvasObject {
 
   // Descripció
-  text:= fmt.Sprintf ( FILE_VIEW_TEMPLATE, "Blo", "Blo",
-    "Blo", "Blo", size_to_string ( 999 ) )
+  text:= fmt.Sprintf ( FILE_VIEW_TEMPLATE, "Blo", "Blo" )
   desc:= widget.NewRichTextFromMarkdown ( text )
   
   return container.NewMax ( desc )
@@ -185,9 +178,7 @@ func (self *_Factory) setFileView (o fyne.CanvasObject, f File) {
   cont:= o.(*fyne.Container)
 
   // Descripció
-  text:= fmt.Sprintf ( FILE_VIEW_TEMPLATE,
-    f.GetName (), f.GetType (), f.GetMD5 (), f.GetSHA1 (),
-    size_to_string ( f.GetSize () ) )
+  text:= fmt.Sprintf ( FILE_VIEW_TEMPLATE, f.GetName (), f.GetType () )
   cont.Objects[0]= widget.NewRichTextFromMarkdown ( text )
   
 } // end setFileView
