@@ -65,7 +65,10 @@ type Entry interface {
   GetFileIDs() []int64
 
   // Torna la imatge de la portada. Pot tornar nil
-  GetCover () image.Image
+  GetCover() image.Image
+
+  // Torna els identificadors de les etiquetes que té aquesta entrada.
+  GetLabelIDs() []int
   
 }
 
@@ -84,9 +87,15 @@ type DataModel interface {
   // (3 lletres??) i un color. Per tant cal que el model torne eixa
   // informació gràfica.
   GetPlatformHints(id int) (idname string,color color.Color)
+
+  // Torna el nom de la plataforma.
+  GetPlatformName(id int) string
   
   // Torna el fitxer indicat
   GetFile(id int64) File
+
+  // Torna la informació d'una etiqueta. Nom i color.
+  GetLabelInfo(id int) (name string,color color.Color)
   
 }
 
@@ -126,6 +135,7 @@ type _FakeEntry struct {
   pid      int
   file_ids []int64
   cover    string // Pot ser nil
+  labels   []int
 }
 
 func (self *_FakeEntry) GetName() string {
@@ -149,6 +159,10 @@ func (self *_FakeEntry) GetCover() image.Image {
   return ret
 }
 
+func (self *_FakeEntry) GetLabelIDs() []int {
+  return self.labels
+}
+
 type _FakePlatformHint struct {
   idname string
   color  color.Color
@@ -158,6 +172,9 @@ type _FakeDataModel struct {
   entries []_FakeEntry
   files   []_FakeFile
   phints  []_FakePlatformHint
+  pnames  []string
+  lnames  []string
+  lcolors []color.Color
 }
 
 func (self *_FakeDataModel) RootEntries() []int64 {
@@ -181,17 +198,27 @@ func (self *_FakeDataModel) GetPlatformHints(id int) (string,color.Color) {
   return tmp.idname,tmp.color
 }
 
+func (self *_FakeDataModel) GetPlatformName(id int) string {
+  return self.pnames[id]
+}
+
+func (self *_FakeDataModel) GetLabelInfo(id int) (string,color.Color) {
+  return self.lnames[id],self.lcolors[id]
+}
+
 func newFakeDataModel() *_FakeDataModel {
   ret:= _FakeDataModel {
     entries: []_FakeEntry {
       _FakeEntry{
         name:"Thunder Force IV",pid:0,
         file_ids: []int64{0},
-        cover: "blo",        
+        cover: "blo",
+        labels: []int{3,4},
       },
         _FakeEntry{name:"Mortal Kombat",pid:1,
           file_ids: []int64 {1,2,3,4},
           cover: "/home/adria/COLJOCS/DOS/Mortal Kombat/screenshots/s1.png",
+          labels: []int{2,4,0,1,3},
         },
       },
       files: []_FakeFile {
@@ -224,7 +251,25 @@ func newFakeDataModel() *_FakeDataModel {
       phints: []_FakePlatformHint {
       _FakePlatformHint{idname:"MD ",color:color.RGBA{69,143,217,255}},
         _FakePlatformHint{idname:"DOS",color:color.RGBA{128,128,128,255}},
-    },
-  }
+      },
+      pnames: []string {
+      "Sega MegaDrive",
+        "MS-DOS",
+      },
+      lnames: []string {
+      "Aventura",
+        "Estratègia",
+        "Lluita",
+        "Tirs",
+        "Perspectiva lateral",
+      },
+      lcolors: []color.Color{
+        color.RGBA{255,200,200,255},
+        color.RGBA{255,200,200,255},
+        color.RGBA{255,200,200,255},
+        color.RGBA{255,200,200,255},
+        color.RGBA{200,200,255,255},
+      },
+    }
   return &ret
 }

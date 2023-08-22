@@ -29,8 +29,34 @@ import (
   "fyne.io/fyne/v2"
   "fyne.io/fyne/v2/canvas"
   "fyne.io/fyne/v2/container"
+  "fyne.io/fyne/v2/theme"
   "fyne.io/fyne/v2/widget"
 )
+
+
+
+
+/****************/
+/* PART PRIVADA */
+/****************/
+
+func (self *DetailsViewer) newLabel ( id int ) fyne.CanvasObject {
+
+  name,mcolor:= self.model.GetLabelInfo ( id )
+
+  gray:= color.RGBA{50,50,50,255}
+  rect:= canvas.NewRectangle ( mcolor )
+  rect.StrokeColor= gray
+  rect.StrokeWidth= 0.5
+  text:= canvas.NewText ( name, gray )
+  text.TextSize= 11.0
+  text.Alignment= fyne.TextAlignCenter
+  text.TextStyle= fyne.TextStyle{Bold:true}
+  ret:= container.NewMax ( rect, container.NewPadded ( text ) )
+  
+  return ret
+  
+} // end newLabel
 
 
 
@@ -65,22 +91,57 @@ func (self *DetailsViewer) ViewEntry ( e Entry ) {
   
   // Neteja
   self.root.RemoveAll ()
-
-  // Títol
-  title:= canvas.NewText ( e.GetName (), color.RGBA{60,60,60,255} )
-  title.TextSize= 25
-  title.Alignment= fyne.TextAlignCenter
-  title.TextStyle= fyne.TextStyle{Bold:true}
-  self.root.Add ( title )
   
-  // Portada
+  // Crea card
+  card:= widget.NewCard (
+    e.GetName (),
+    self.model.GetPlatformName ( e.GetPlatformID () ),
+    widget.NewLabel ( "Hola" ),
+  )
+  // --> Portada
   cover:= e.GetCover ()
   if cover != nil {
     img:= canvas.NewImageFromImage ( cover )
     img.FillMode= canvas.ImageFillContain
-    img.SetMinSize ( fyne.Size{200,200} )
-    self.root.Add ( img )
+    img.SetMinSize ( fyne.Size{1,1} )
+    card.SetImage ( img )
   }
+  // --> Contingut
+  label_ids:= e.GetLabelIDs ()
+  labels:= make([]fyne.CanvasObject,len(label_ids))
+  maxw,maxh:= float32(1),float32(1)
+  for i:= 0; i < len(label_ids); i++ {
+    l:= self.newLabel ( label_ids[i] )
+    labels[i]= l
+    size:= l.MinSize ()
+    if size.Width > maxw { maxw= size.Width }
+    if size.Height > maxh { maxh= size.Height }
+  }
+  content:= container.NewGridWrap ( fyne.Size{maxw,maxh} )
+  content.Objects= labels
+  text_tmp:= fmt.Sprintf (
+    `**Nº Fitxers:** %d
+
+**Etiquetes:**`,
+    len(e.GetFileIDs ()),
+  )
+  text:= widget.NewRichTextFromMarkdown ( text_tmp )
+  content= container.NewVBox ( text, content )
+  card.SetContent ( content )
+  
+  // Crea toolbar
+  toolbar:= widget.NewToolbar (
+    widget.NewToolbarSpacer (),
+    widget.NewToolbarAction ( theme.DocumentCreateIcon (), func() {
+      fmt.Println ( "EDIT BUTTON!!!!" )
+    }),
+    widget.NewToolbarAction ( theme.DeleteIcon (), func() {
+      fmt.Println ( "DELETE BUTTON!!!!" )
+    }),
+  )
+  
+  // Afegeix
+  self.root.Add ( container.NewVBox ( card, toolbar ) )
   
 } // end ViewEntry
 
