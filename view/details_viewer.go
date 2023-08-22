@@ -157,8 +157,7 @@ func (self *DetailsViewer) ViewFile ( f File ) {
   md:= f.GetMetadata ()
   for i:= 0; i < len(md); i++ {
     text_tmp+= fmt.Sprintf ( `
-**%s:** %s
-
+- **%s:** %s
 `,
       md[i].GetKey (), md[i].GetValue () )
   }
