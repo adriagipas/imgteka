@@ -31,8 +31,15 @@ import (
 )
 
 
-type File interface {
+type StringPair interface {
+  
+  GetKey() string
 
+  GetValue() string
+}
+
+
+type File interface {
   // Torna el nom del fitxer
   GetName() string
 
@@ -48,6 +55,9 @@ type File interface {
 
   // Torna la grandària en bytes
   GetSize() int64
+
+  // Torna metadades associades a aquest fitxer
+  GetMetadata() []StringPair
   
 }
 
@@ -108,6 +118,7 @@ type _FakeFile struct {
   md5   string
   sha1  string
   size  int64
+  md    []StringPair
 }
 
 func (self *_FakeFile) GetName() string {
@@ -128,6 +139,10 @@ func (self *_FakeFile) GetSHA1() string {
 
 func (self *_FakeFile) GetSize() int64 {
   return self.size
+}
+
+func (self *_FakeFile) GetMetadata() []StringPair {
+  return self.md
 }
 
 type _FakeEntry struct {
@@ -206,6 +221,14 @@ func (self *_FakeDataModel) GetLabelInfo(id int) (string,color.Color) {
   return self.lnames[id],self.lcolors[id]
 }
 
+type _MetadataValue struct {
+  property string
+  value    string
+}
+
+func (self *_MetadataValue) GetKey() string { return self.property }
+func (self *_MetadataValue) GetValue() string { return self.value }
+
 func newFakeDataModel() *_FakeDataModel {
   ret:= _FakeDataModel {
     entries: []_FakeEntry {
@@ -226,27 +249,55 @@ func newFakeDataModel() *_FakeDataModel {
         type_:"Sega Mega Drive ROM",
         md5:"9EE8071A16E26613E6BACDC5056ACCC5",
         sha1:"5FCFB8EAA946F1C4968E5B27DF6476CB41C8D3D3",
-        size:1048576},
+        size:1048576,
+        md: []StringPair{
+          &_MetadataValue{"md5","9EE8071A16E26613E6BACDC5056ACCC5"},
+          &_MetadataValue{"sha1","5FCFB8EAA946F1C4968E5B27DF6476CB41C8D3D3"},
+          &_MetadataValue{"Grandària","1048576 B (1 MB)"},
+          &_MetadataValue{"Firma i data","(C)T-18 1992.AUG"},
+          &_MetadataValue{"Nom domèstic","THUNDER FORCE 4"},
+          &_MetadataValue{"Tipus i número de serie","GM MK-1143 -50"},
+        }},
         _FakeFile{name:"disc1.img",
           type_:"Disquet 3½",
           md5:"9EE8071A16E26613E6BACDC5056ACCC5",
           sha1:"5FCFB8EAA946F1C4968E5B27DF6476CB41C8D3D3",
-          size:1474560},
+          size:1474560,
+          md: []StringPair{
+            &_MetadataValue{"md5","9EE8071A16E26613E6BACDC5056ACCC5"},
+            &_MetadataValue{"sha1","5FCFB8EAA946F1C4968E5B27DF6476CB41C8D3D3"},
+            &_MetadataValue{"size","1474560 B (1.4 MB)"},
+          }},
         _FakeFile{name:"disc2.img",
           type_:"Disquet 3½",
           md5:"9EE8071A16E26613E6BACDC5056ACCC5",
           sha1:"5FCFB8EAA946F1C4968E5B27DF6476CB41C8D3D3",
-          size:1474560},
+          size:1474560,
+          md: []StringPair{
+            &_MetadataValue{"md5","9EE8071A16E26613E6BACDC5056ACCC5"},
+            &_MetadataValue{"sha1","5FCFB8EAA946F1C4968E5B27DF6476CB41C8D3D3"},
+            &_MetadataValue{"size","1474560 B (1.4 MB)"},
+          }},
         _FakeFile{name:"disc3.img",
           type_:"Disquet 3½",
           md5:"9EE8071A16E26613E6BACDC5056ACCC5",
           sha1:"5FCFB8EAA946F1C4968E5B27DF6476CB41C8D3D3",
-          size:147456000},
+          size:147456000,
+          md: []StringPair{
+            &_MetadataValue{"md5","9EE8071A16E26613E6BACDC5056ACCC5"},
+            &_MetadataValue{"sha1","5FCFB8EAA946F1C4968E5B27DF6476CB41C8D3D3"},
+            &_MetadataValue{"size","147456000 B (140.6 MB)"},
+          }},
         _FakeFile{name:"manual.pdf",
           type_:"Document PDF",
           md5:"B937BE5E84BBAA799FF1E029FD4246E4",
           sha1:"7E8942C85FB9B1BF303BC0C7C786BA8C2FB594D2",
-          size:9224710},
+          size:9224710,
+          md: []StringPair{
+            &_MetadataValue{"md5","B937BE5E84BBAA799FF1E029FD4246E4"},
+            &_MetadataValue{"sha1","7E8942C85FB9B1BF303BC0C7C786BA8C2FB594D2"},
+            &_MetadataValue{"size","9224710 B (8.8 MB)"},
+          }},
       },
       phints: []_FakePlatformHint {
       _FakePlatformHint{idname:"MD ",color:color.RGBA{69,143,217,255}},

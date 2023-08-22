@@ -66,7 +66,7 @@ func (self *DetailsViewer) newLabel ( id int ) fyne.CanvasObject {
 /****************/
 
 type DetailsViewer struct {
-  root  *fyne.Container // Contenedor bàsic
+  root  *fyne.Container // Contenedor intern que es modifica
   model DataModel
 }
 
@@ -77,7 +77,6 @@ func NewDetailsViewer ( model DataModel ) *DetailsViewer {
     root : container.NewVBox (),
     model : model,
   }
-  ret.root.Add ( widget.NewLabel ( "Hola" ) )
   
   return &ret
   
@@ -93,19 +92,6 @@ func (self *DetailsViewer) ViewEntry ( e Entry ) {
   self.root.RemoveAll ()
   
   // Crea card
-  card:= widget.NewCard (
-    e.GetName (),
-    self.model.GetPlatformName ( e.GetPlatformID () ),
-    widget.NewLabel ( "Hola" ),
-  )
-  // --> Portada
-  cover:= e.GetCover ()
-  if cover != nil {
-    img:= canvas.NewImageFromImage ( cover )
-    img.FillMode= canvas.ImageFillContain
-    img.SetMinSize ( fyne.Size{1,1} )
-    card.SetImage ( img )
-  }
   // --> Contingut
   label_ids:= e.GetLabelIDs ()
   labels:= make([]fyne.CanvasObject,len(label_ids))
@@ -127,7 +113,20 @@ func (self *DetailsViewer) ViewEntry ( e Entry ) {
   )
   text:= widget.NewRichTextFromMarkdown ( text_tmp )
   content= container.NewVBox ( text, content )
-  card.SetContent ( content )
+  // --> Card
+  card:= widget.NewCard (
+    e.GetName (),
+    self.model.GetPlatformName ( e.GetPlatformID () ),
+    content,
+  )
+  // --> Portada
+  cover:= e.GetCover ()
+  if cover != nil {
+    img:= canvas.NewImageFromImage ( cover )
+    img.FillMode= canvas.ImageFillContain
+    img.SetMinSize ( fyne.Size{1,1} )
+    card.SetImage ( img )
+  }
   
   // Crea toolbar
   toolbar:= widget.NewToolbar (
@@ -141,12 +140,52 @@ func (self *DetailsViewer) ViewEntry ( e Entry ) {
   )
   
   // Afegeix
-  self.root.Add ( container.NewVBox ( card, toolbar ) )
+  tmp:= container.NewVBox ( container.NewHScroll ( card ), toolbar )
+  self.root.Add ( tmp )
   
 } // end ViewEntry
 
 
 func (self *DetailsViewer) ViewFile ( f File ) {
-  fmt.Printf ( "VIEW_FILE: %v\n", f )
+  
+  // Neteja
+  self.root.RemoveAll ()
 
+
+  // Contingut
+  text_tmp:= ""
+  md:= f.GetMetadata ()
+  for i:= 0; i < len(md); i++ {
+    text_tmp+= fmt.Sprintf ( `
+**%s:** %s
+
+`,
+      md[i].GetKey (), md[i].GetValue () )
+  }
+  text:= widget.NewRichTextFromMarkdown ( text_tmp )
+  
+  // Crea card
+  card:= widget.NewCard (
+    f.GetName (),
+    f.GetType (),
+    text,
+  )
+
+  // Crea toolbar
+  // NOTA!! En el futur el RUN el podem ficar sols si el tipus de
+  // fitxer es pot executar.
+  toolbar:= widget.NewToolbar (
+    widget.NewToolbarSpacer (),
+    widget.NewToolbarAction ( theme.MediaPlayIcon (), func() {
+      fmt.Println ( "PLAY BUTTON!!!!" )
+    }),
+    widget.NewToolbarAction ( theme.DeleteIcon (), func() {
+      fmt.Println ( "DELETE BUTTON!!!!" )
+    }),
+  )
+  
+  // Afegeix
+  tmp:= container.NewVBox ( container.NewHScroll ( card ), toolbar )
+  self.root.Add ( tmp )
+  
 } // end ViewFile
