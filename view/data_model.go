@@ -74,6 +74,17 @@ type Entry interface {
 }
 
 
+type Stats interface {
+
+  // Torna el nombre d'entrades
+  GetNumEntries() int64
+
+  // Torna el nombre de fitxers
+  GetNumFiles() int64
+  
+}
+
+
 type DataModel interface {
 
   // Torna la llista dels identificadors (long) de tots els objectes del
@@ -97,6 +108,9 @@ type DataModel interface {
 
   // Torna la informació d'una etiqueta. Nom i color.
   GetLabelInfo(id int) (name string,color color.Color)
+
+  // Obté estadístiques
+  GetStats() Stats
   
 }
 
@@ -212,6 +226,14 @@ func (self *_FakeDataModel) GetLabelInfo(id int) (string,color.Color) {
   return self.lnames[id],self.lcolors[id]
 }
 
+func (self *_FakeDataModel) GetStats() Stats {
+  ret:= _Stats{
+    nentries : int64(len(self.entries)),
+    nfiles : int64(len(self.files)),
+  }
+  return &ret
+}
+
 type _MetadataValue struct {
   property string
   value    string
@@ -219,6 +241,14 @@ type _MetadataValue struct {
 
 func (self *_MetadataValue) GetKey() string { return self.property }
 func (self *_MetadataValue) GetValue() string { return self.value }
+
+type _Stats struct {
+  nentries int64
+  nfiles   int64
+}
+
+func (self *_Stats) GetNumEntries() int64 { return self.nentries }
+func (self *_Stats) GetNumFiles() int64 { return self.nfiles }
 
 func newFakeDataModel() *_FakeDataModel {
   ret:= _FakeDataModel {

@@ -23,6 +23,8 @@
 package view
 
 import (
+  "fmt"
+  
   "fyne.io/fyne/v2"
   "fyne.io/fyne/v2/app"
   "fyne.io/fyne/v2/container"
@@ -33,6 +35,9 @@ func Run() error {
 
   // Crea
   a:= app.NewWithID ( "org.github.adriagipas.imgteka" )
+  a.Lifecycle ().SetOnStopped ( func() {
+    fmt.Println ( "Adéu!!!!" )
+  })
   win:= a.NewWindow ( "imgteka" )
 
   // Construeix elements
@@ -40,10 +45,19 @@ func Run() error {
   dv:= NewDetailsViewer ( model )
   list:= NewList ( model, dv )
   split:= container.NewHSplit ( list, dv.GetCanvas () )
+  split.Offset= 0.65
 
   // Barra cerca i menú
   toolbar:= NewToolbar ( model )
-  mbox:= container.NewBorder ( toolbar.GetCanvas (), nil, nil, nil, split )
+
+  // StatusBar
+  statusbar:= NewStatusBar ( model )
+
+  // Content
+  mbox:= container.NewBorder (
+    toolbar.GetCanvas (),
+    statusbar.GetCanvas (),
+    nil, nil, split )
   
   // Executa
   win.SetContent ( mbox )
