@@ -26,6 +26,7 @@ package main
 import (
   "log"
 
+  "github.com/adriagipas/imgteka/lock"
   "github.com/adriagipas/imgteka/view"
 )
 
@@ -36,8 +37,11 @@ func main() {
   log.SetFlags ( 0 )
 
   // Executa
-  if err:= view.Run (); err != nil {
-    log.Fatal ( err )
+  if lock.Init () {
+    if err:= view.Run (); err != nil {
+      log.Fatal ( err )
+    }
+    lock.Close ()
   }
   
 }

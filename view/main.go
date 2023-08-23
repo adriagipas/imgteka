@@ -25,6 +25,7 @@ package view
 import (
   "fmt"
   
+  "github.com/adriagipas/imgteka/lock"
   "fyne.io/fyne/v2"
   "fyne.io/fyne/v2/app"
   "fyne.io/fyne/v2/container"
@@ -39,6 +40,7 @@ func Run() error {
     fmt.Println ( "Adéu!!!!" )
   })
   win:= a.NewWindow ( "imgteka" )
+  win.CenterOnScreen ()
 
   // Construeix elements
   model:= newFakeDataModel ()
@@ -58,6 +60,15 @@ func Run() error {
     toolbar.GetCanvas (),
     statusbar.GetCanvas (),
     nil, nil, split )
+
+  // Llança lock check_signal
+  go func() {
+    for ; true; {
+      if lock.CheckSignals () {
+        win.Show ()
+      }
+    }
+  } ()
   
   // Executa
   win.SetContent ( mbox )
