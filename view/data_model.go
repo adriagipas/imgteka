@@ -95,6 +95,9 @@ type Platform interface {
 
   // Torna el color assignat a la plataforma
   GetColor() color.Color
+
+  // Torna el nombre de fitxers
+  GetNumFiles() int64
   
 }
 
@@ -107,6 +110,9 @@ type DataModel interface {
   // Torna una entrada del model
   GetEntry(id int64) Entry
 
+  // Torna els identificadors de les plataformes
+  GetPlatformIDs() []int
+  
   // Torna la plataforma.
   GetPlatform(id int) Platform
   
@@ -194,6 +200,7 @@ type _FakePlatform struct {
   name       string
   short_name string
   color      color.Color
+  num_files  int64
 }
 
 func (self *_FakePlatform) GetName() string {
@@ -206,6 +213,10 @@ func (self *_FakePlatform) GetShortName() string {
 
 func (self *_FakePlatform) GetColor() color.Color {
   return self.color
+}
+
+func (self *_FakePlatform) GetNumFiles() int64 {
+  return self.num_files
 }
 
 type _FakeDataModel struct {
@@ -246,6 +257,14 @@ func (self *_FakeDataModel) GetStats() Stats {
     nfiles : int64(len(self.files)),
   }
   return &ret
+}
+
+func (self *_FakeDataModel) GetPlatformIDs() []int {
+  ret:= make([]int,len(self.plats))
+  for i:= 0; i < len(self.plats); i++ {
+    ret[i]= i
+  }
+  return ret
 }
 
 type _MetadataValue struct {
@@ -339,11 +358,14 @@ func newFakeDataModel() *_FakeDataModel {
         name:"Sega MegaDrive",
         short_name:"MD ",
         color:color.RGBA{69,143,217,255},
+        num_files:1,
       },
         _FakePlatform{
           name:"MS-DOS",
           short_name:"DOS",
-          color:color.RGBA{128,128,128,255}},
+          color:color.RGBA{128,128,128,255},
+          num_files:0,
+        },
       },
       lnames: []string {
       "Aventura",

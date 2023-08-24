@@ -40,16 +40,14 @@ import (
 
 type Toolbar struct {
   root  *fyne.Container // Contenedor arrel
-  model DataModel
 }
 
 
-func NewToolbar ( model DataModel ) *Toolbar {
+func NewToolbar ( model DataModel, main_win fyne.Window ) *Toolbar {
 
   // Crea
   ret:= Toolbar{
     root : container.NewVBox (),
-    model : model,
   }
 
   // Crea barra cerca
@@ -70,9 +68,9 @@ func NewToolbar ( model DataModel ) *Toolbar {
   // Botó configuració
   conf_but:= widget.NewButtonWithIcon ( "", theme.SettingsIcon (),
     func(){
-      fmt.Println ( "CONFIGURA!!!" )
+      RunConfigWin ( model, main_win )
     })
-
+  
   // Afegeix
   box:= container.NewBorder ( nil, nil, add_but, conf_but, search_bar )
   ret.root.Add ( box )

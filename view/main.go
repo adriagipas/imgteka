@@ -50,7 +50,7 @@ func Run() error {
   split.Offset= 0.65
 
   // Barra cerca i menú
-  toolbar:= NewToolbar ( model )
+  toolbar:= NewToolbar ( model, win )
 
   // StatusBar
   statusbar:= NewStatusBar ( model )
