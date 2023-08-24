@@ -147,8 +147,8 @@ func (self *_Factory) getPlatformLabel(id int) fyne.CanvasObject {
   if ok { return ret }
 
   // Crea el valor
-  idname,color:= self.model.GetPlatformHints ( id )
-  ret= newPlatformLabel ( idname, color )
+  plat:= self.model.GetPlatform ( id )
+  ret= newPlatformLabel ( plat.GetShortName (), plat.GetColor () )
   self.platform_labels[id]= ret
 
   return ret

@@ -116,7 +116,7 @@ func (self *DetailsViewer) ViewEntry ( e Entry ) {
   // --> Card
   card:= widget.NewCard (
     e.GetName (),
-    self.model.GetPlatformName ( e.GetPlatformID () ),
+    self.model.GetPlatform ( e.GetPlatformID () ).GetName (),
     content,
   )
   // --> Portada

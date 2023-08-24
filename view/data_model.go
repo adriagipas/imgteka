@@ -85,6 +85,19 @@ type Stats interface {
 }
 
 
+type Platform interface {
+
+  // Torna el nom
+  GetName() string
+
+  // Torna el nom curt (màxim 3 lletres)
+  GetShortName() string
+
+  // Torna el color assignat a la plataforma
+  GetColor() color.Color
+  
+}
+
 type DataModel interface {
 
   // Torna la llista dels identificadors (long) de tots els objectes del
@@ -94,14 +107,8 @@ type DataModel interface {
   // Torna una entrada del model
   GetEntry(id int64) Entry
 
-  // Independentment del tipus de UI, vull que per a cada entrada es
-  // motre al costat un quadrat amb l'identificador de la plataforma
-  // (3 lletres??) i un color. Per tant cal que el model torne eixa
-  // informació gràfica.
-  GetPlatformHints(id int) (idname string,color color.Color)
-
-  // Torna el nom de la plataforma.
-  GetPlatformName(id int) string
+  // Torna la plataforma.
+  GetPlatform(id int) Platform
   
   // Torna el fitxer indicat
   GetFile(id int64) File
@@ -183,16 +190,28 @@ func (self *_FakeEntry) GetLabelIDs() []int {
   return self.labels
 }
 
-type _FakePlatformHint struct {
-  idname string
-  color  color.Color
+type _FakePlatform struct {
+  name       string
+  short_name string
+  color      color.Color
+}
+
+func (self *_FakePlatform) GetName() string {
+  return self.name
+}
+
+func (self *_FakePlatform) GetShortName() string {
+  return self.short_name
+}
+
+func (self *_FakePlatform) GetColor() color.Color {
+  return self.color
 }
 
 type _FakeDataModel struct {
   entries []_FakeEntry
   files   []_FakeFile
-  phints  []_FakePlatformHint
-  pnames  []string
+  plats   []_FakePlatform
   lnames  []string
   lcolors []color.Color
 }
@@ -213,13 +232,8 @@ func (self *_FakeDataModel) GetFile(id int64) File {
   return &self.files[id]
 }
 
-func (self *_FakeDataModel) GetPlatformHints(id int) (string,color.Color) {
-  tmp:= self.phints[id]
-  return tmp.idname,tmp.color
-}
-
-func (self *_FakeDataModel) GetPlatformName(id int) string {
-  return self.pnames[id]
+func (self *_FakeDataModel) GetPlatform(id int) Platform {
+  return &self.plats[id]
 }
 
 func (self *_FakeDataModel) GetLabelInfo(id int) (string,color.Color) {
@@ -320,13 +334,16 @@ func newFakeDataModel() *_FakeDataModel {
             &_MetadataValue{"size","9224710 B (8.8 MB)"},
           }},
       },
-      phints: []_FakePlatformHint {
-      _FakePlatformHint{idname:"MD ",color:color.RGBA{69,143,217,255}},
-        _FakePlatformHint{idname:"DOS",color:color.RGBA{128,128,128,255}},
+      plats: []_FakePlatform {
+      _FakePlatform{
+        name:"Sega MegaDrive",
+        short_name:"MD ",
+        color:color.RGBA{69,143,217,255},
       },
-      pnames: []string {
-      "Sega MegaDrive",
-        "MS-DOS",
+        _FakePlatform{
+          name:"MS-DOS",
+          short_name:"DOS",
+          color:color.RGBA{128,128,128,255}},
       },
       lnames: []string {
       "Aventura",
