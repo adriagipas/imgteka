@@ -17,37 +17,39 @@
  * along with adriagipas/imgteka.  If not, see <https://www.gnu.org/licenses/>.
  */
 /*
- *  main.go - Utilitat per a gestionar imatges de disquets, roms,
- *            cdroms, etc.
+ *  main.go - Implementa la llògica del sistema.
  */
 
-package main
+package model
 
 import (
-  "log"
-
-  "github.com/adriagipas/imgteka/lock"
-  "github.com/adriagipas/imgteka/model"
-  "github.com/adriagipas/imgteka/view"
+  //"fmt"
 )
 
-func main() {
-
-  // Inicialitza log.
-  log.SetPrefix ( "[imgteka]" )
-  log.SetFlags ( 0 )
-
-  // Executa
-  if lock.Init () {
-    model,err:= model.New ()
-    if err != nil {
-      log.Fatal ( err )
-    }
-    if err:= view.Run (); err != nil {
-      log.Fatal ( err )
-    }
-    model.Close ()
-    lock.Close ()
-  }
-  
+type Model struct {
+  dirs *Dirs
+  db   *Database
 }
+
+
+func New() (*Model,error) {
+
+  // Crea objectes
+  dirs:= NewDirs ()
+  db,err:= NewDatabase ( dirs )
+  if err != nil { return nil,err }
+  
+  // Crea model
+  ret:= Model{
+    dirs : dirs,
+    db : db,
+  }
+
+  return &ret,nil
+  
+} // end New
+
+
+func (self *Model) Close() {
+  self.db.Close ()
+} // end Close

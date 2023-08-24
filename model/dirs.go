@@ -17,37 +17,64 @@
  * along with adriagipas/imgteka.  If not, see <https://www.gnu.org/licenses/>.
  */
 /*
- *  main.go - Utilitat per a gestionar imatges de disquets, roms,
- *            cdroms, etc.
+ *  dirs.go - Gestiona el directoris on es desen els fitxers.
  */
 
-package main
+package model
 
 import (
-  "log"
-
-  "github.com/adriagipas/imgteka/lock"
-  "github.com/adriagipas/imgteka/model"
-  "github.com/adriagipas/imgteka/view"
+  "path"
+  
+  "github.com/adrg/xdg"
 )
 
-func main() {
 
-  // Inicialitza log.
-  log.SetPrefix ( "[imgteka]" )
-  log.SetFlags ( 0 )
 
-  // Executa
-  if lock.Init () {
-    model,err:= model.New ()
-    if err != nil {
-      log.Fatal ( err )
+
+/****************/
+/* PART PRIVADA */
+/****************/
+
+const _ROOT_NAME= "imgteka"
+
+
+
+
+/****************/
+/* PART PÚBLICA */
+/****************/
+
+type Dirs struct {
+  db_name *string // Nom base de dades
+}
+
+
+func NewDirs() *Dirs {
+  
+  ret:= Dirs{
+    db_name : nil,
+  }
+
+  return &ret
+  
+} // end NewDirs
+
+
+func (self *Dirs) GetDatabaseName() (string,error) {
+
+  var ret string
+  var err error
+  
+  if self.db_name == nil {
+    path:= path.Join ( _ROOT_NAME, "database.db" )
+    ret,err= xdg.DataFile ( path )
+    if err == nil {
+      self.db_name= &ret
     }
-    if err:= view.Run (); err != nil {
-      log.Fatal ( err )
-    }
-    model.Close ()
-    lock.Close ()
+  } else {
+    ret,err= *self.db_name,nil
   }
   
-}
+  return ret,err
+  
+} // end GetDatabaseName
