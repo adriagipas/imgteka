@@ -32,7 +32,7 @@ import (
 )
 
 
-func Run() error {
+func Run ( model DataModel ) error {
 
   // Crea
   a:= app.NewWithID ( "org.github.adriagipas.imgteka" )
@@ -43,7 +43,6 @@ func Run() error {
   win.CenterOnScreen ()
 
   // Construeix elements
-  model:= newFakeDataModel ()
   dv:= NewDetailsViewer ( model )
   list:= NewList ( model, dv )
   split:= container.NewHSplit ( list, dv.GetCanvas () )

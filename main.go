@@ -43,7 +43,7 @@ func main() {
     if err != nil {
       log.Fatal ( err )
     }
-    if err:= view.Run (); err != nil {
+    if err:= view.Run ( model ); err != nil {
       log.Fatal ( err )
     }
     model.Close ()
