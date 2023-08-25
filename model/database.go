@@ -25,6 +25,7 @@ package model
 import (
   "database/sql"
   _ "github.com/mattn/go-sqlite3"
+  "log"
 )
 
 
@@ -96,3 +97,58 @@ func NewDatabase ( dirs *Dirs ) (*Database,error){
 func (self *Database) Close () {
   self.conn.Close ()
 } // end Close
+
+
+func (self *Database) LoadPlatforms ( plats *Platforms ) error {
+
+  // Consulta base de dades
+  rows,err:= self.conn.Query ( `
+SELECT id,short_name,name,color_r,color_g,color_b
+FROM PLATFORMS
+ORDER BY short_name ASC;
+` )
+  if err != nil { return err }
+  defer rows.Close ()
+
+  // Recorre consulta
+  for rows.Next () {
+    var id int
+    var short_name,name string
+    var r,g,b int
+    err= rows.Scan ( &id, &short_name, &name, &r, &g, &b )
+    if err != nil { return err }
+    plats.add ( id, short_name, name, uint8(r), uint8(g), uint8(b) )
+  }
+  
+  return rows.Err ()
+  
+} // end LoadPlatforms
+
+
+func (self *Database) RegisterPlatform(
+
+  short_name string,
+  name       string,
+  r,g,b      uint8,
+  
+) error {
+
+  // Prepara
+  tx,err:= self.conn.Begin ()
+  if err != nil { log.Fatal ( err ) }
+  stmt,err:= tx.Prepare ( `
+   INSERT INTO PLATFORMS(short_name, name, color_r, color_g, color_b)
+          VALUES(?,?,?,?,?);
+` )
+  if err != nil { log.Fatal ( err ) }
+  defer stmt.Close ()
+
+  // Inserta
+  _,err= stmt.Exec ( short_name, name, int(r), int(g), int(b) )
+  if err != nil { return err }
+  err= tx.Commit ()
+  if err != nil { return err }
+
+  return nil
+  
+} // end RegisterPlatform

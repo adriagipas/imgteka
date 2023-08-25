@@ -120,10 +120,13 @@ type DataModel interface {
   GetFile(id int64) File
 
   // Torna la informació d'una etiqueta. Nom i color.
-  GetLabelInfo(id int) (name string,color color.Color)
+  GetLabelInfo(id int) (name string,c color.Color)
 
   // Obté estadístiques
   GetStats() Stats
+
+  // Afegeix una nova plataforma
+  AddPlatform(short_name string,name string,c color.Color) error
   
 }
 

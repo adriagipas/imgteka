@@ -42,7 +42,11 @@ import (
 /* PART PRIVADA */
 /****************/
 
-func showNewPlatform ( model DataModel, main_win fyne.Window ) {
+func showNewPlatform (
+  model    DataModel,
+  main_win fyne.Window,
+  list     *widget.List,
+) {
 
   // Nom curt
   shortname:= widget.NewEntry ()
@@ -84,7 +88,12 @@ func showNewPlatform ( model DataModel, main_win fyne.Window ) {
   dialog.ShowForm ( "Plataforma nova", "Afegeix", "Cancel·la", items,
     func(b bool){
       if !b { return }
-      fmt.Printf ( "Shortname: %s  Name: %s  Color: %v", shortname.Text, name.Text, mcolor )
+      if err:= model.AddPlatform (
+        shortname.Text, name.Text, mcolor ); err != nil {
+        dialog.ShowError ( err, main_win )
+      } else {
+        list.Refresh ()
+      }
     }, main_win )
   
 } // end showNewPlatform
@@ -159,14 +168,6 @@ func NewPlatformsManager (
   model DataModel,
   main_win fyne.Window,
 ) fyne.CanvasObject {
-
-  // Botonera
-  but_new:= widget.NewButtonWithIcon ( "Nova Plataforma",
-    theme.ContentAddIcon (), func(){
-      showNewPlatform ( model, main_win )
-    })
-  but_box:= container.NewHBox ( but_new )
-  but_box= container.NewPadded ( but_box )
   
   // Llista plataformes
   list:= widget.NewList (
@@ -187,6 +188,14 @@ func NewPlatformsManager (
     },
   )
 
+  // Botonera
+  but_new:= widget.NewButtonWithIcon ( "Nova Plataforma",
+    theme.ContentAddIcon (), func(){
+      showNewPlatform ( model, main_win, list )
+    })
+  but_box:= container.NewHBox ( but_new )
+  but_box= container.NewPadded ( but_box )
+  
   // Crea contingut
   ret:= container.NewBorder ( but_box, nil, nil, nil, list )
   

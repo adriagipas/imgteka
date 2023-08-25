@@ -34,8 +34,9 @@ import (
 
 
 type Model struct {
-  dirs *Dirs
-  db   *Database
+  dirs  *Dirs
+  db    *Database
+  plats *Platforms
 }
 
 
@@ -45,13 +46,15 @@ func New() (*Model,error) {
   dirs:= NewDirs ()
   db,err:= NewDatabase ( dirs )
   if err != nil { return nil,err }
+  plats:= NewPlatforms ( db )
   
   // Crea model
   ret:= Model{
     dirs : dirs,
     db : db,
+    plats : plats,
   }
-
+  
   return &ret,nil
   
 } // end New
@@ -75,14 +78,12 @@ func (self *Model) GetEntry( id int64 ) view.Entry {
 
 
 func (self *Model) GetPlatformIDs() []int {
-  fmt.Println ( "TODO GetPlatformIDs !" )
-  return make([]int,0)
+  return self.plats.GetIDs ()
 } // end GetPlatformIDs
 
 
 func (self *Model) GetPlatform( id int ) view.Platform {
-  fmt.Println ( "TODO GetPlatform !" )
-  return &_Platform{}
+  return self.plats.GetPlatform ( id )
 } // end GetPlatform
 
 
@@ -104,6 +105,15 @@ func (self *Model) GetStats() view.Stats {
 }
 
 
+func (self *Model) AddPlatform(
+  short_name string,
+  name       string,
+  c          color.Color,
+) error {
+  return self.plats.Add ( short_name, name, c )
+} // end AddPlatform
+
+
 /// TODO!!!!!!!!!!!!!!!!!!!!! /////////////////////////////////////////////////
 type _Entry struct {}
 func (self *_Entry) GetName() string {return "Fake name"}
@@ -111,11 +121,6 @@ func (self *_Entry) GetPlatformID() int {return 0}
 func (self *_Entry) GetFileIDs() []int64 {return make([]int64,0)}
 func (self *_Entry) GetCover() image.Image {return nil}
 func (self *_Entry) GetLabelIDs() []int {return make([]int,0)}
-type _Platform struct{}
-func (self *_Platform) GetName() string {return "Fake platform"}
-func (self *_Platform) GetShortName() string {return "FAK"}
-func (self *_Platform) GetColor() color.Color {return color.Black}
-func (self *_Platform) GetNumFiles() int64 {return 0}
 type _File struct{}
 func (self *_File) GetName() string {return "Fake file"}
 func (self *_File) GetType() string {return "Fake type"}
