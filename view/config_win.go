@@ -47,7 +47,7 @@ func RunConfigWin ( model DataModel, main_win fyne.Window ) {
   // --> Pestanyes
   plats_tab:= container.NewTabItem (
     "Plataformes",
-    container.NewPadded ( NewPlatformsManager ( model ) ),
+    container.NewPadded ( NewPlatformsManager ( model, main_win ) ),
   )
   tabs:= container.NewAppTabs ( plats_tab )
   
@@ -56,8 +56,7 @@ func RunConfigWin ( model DataModel, main_win fyne.Window ) {
     pop.Hide ()
   })
   but_box:= container.NewBorder ( widget.NewSeparator (), nil, nil, but_close )
-
-
+  
   // Mostra
   content:= container.NewBorder ( nil, but_box, nil, nil, tabs )
   pop_box.Add ( content )

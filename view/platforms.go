@@ -27,7 +27,10 @@ import (
   "image/color"
   
   "fyne.io/fyne/v2"
+  "fyne.io/fyne/v2/canvas"
   "fyne.io/fyne/v2/container"
+  "fyne.io/fyne/v2/data/validation"
+  "fyne.io/fyne/v2/dialog"
   "fyne.io/fyne/v2/theme"
   "fyne.io/fyne/v2/widget"
 )
@@ -38,6 +41,54 @@ import (
 /****************/
 /* PART PRIVADA */
 /****************/
+
+func showNewPlatform ( model DataModel, main_win fyne.Window ) {
+
+  // Nom curt
+  shortname:= widget.NewEntry ()
+  shortname.Validator= validation.NewRegexp ( `^[A-Za-z]{1,3}$`,
+    "el nom curt sols pot contindre majúscules, un mínim d'un caràcter"+
+      " i un màxim de tres" )
+
+  // Nom llarg
+  name:= widget.NewEntry ()
+  name.Validator= validation.NewRegexp ( `^.+$`,
+    "el nom ha de contindre almenys un caràcter" )
+
+  // Color
+  var mcolor color.Color
+  mcolor= color.Black
+  color_rect:= canvas.NewRectangle ( mcolor )
+  color_rect.SetMinSize ( fyne.Size{30,1} )
+  color_but:= widget.NewButton ( "Selecciona", func(){} )
+  color_box:= container.NewHBox ( color_rect,
+    widget.NewSeparator (), color_but )
+  color_but.OnTapped= func(){
+    picker:= dialog.NewColorPicker ( "Selecciona un color",
+      "Selecciona un color", func(c color.Color){
+        mcolor= c
+        color_rect= canvas.NewRectangle ( mcolor )
+        color_rect.SetMinSize ( fyne.Size{30,1} )
+        color_box.Objects[0]= color_rect
+      }, main_win )
+    picker.Advanced= true
+    picker.Show ()
+  }
+  
+  // Dialeg
+  items:= []*widget.FormItem{
+    widget.NewFormItem ( "Nom curt", shortname ) ,
+    widget.NewFormItem ( "Nom", name ),
+    widget.NewFormItem ( "Color", color_box ),
+  }
+  dialog.ShowForm ( "Plataforma nova", "Afegeix", "Cancel·la", items,
+    func(b bool){
+      if !b { return }
+      fmt.Printf ( "Shortname: %s  Name: %s  Color: %v", shortname.Text, name.Text, mcolor )
+    }, main_win )
+  
+} // end showNewPlatform
+
 
 func createPlatformItemTemplate () fyne.CanvasObject {
 
@@ -104,12 +155,15 @@ func updatePlatformItem ( co fyne.CanvasObject, model DataModel, id int ) {
 /* PART PÚBLICA */
 /****************/
 
-func NewPlatformsManager ( model DataModel ) fyne.CanvasObject {
+func NewPlatformsManager (
+  model DataModel,
+  main_win fyne.Window,
+) fyne.CanvasObject {
 
   // Botonera
   but_new:= widget.NewButtonWithIcon ( "Nova Plataforma",
     theme.ContentAddIcon (), func(){
-      fmt.Println ( "Nova Plataforma" )
+      showNewPlatform ( model, main_win )
     })
   but_box:= container.NewHBox ( but_new )
   but_box= container.NewPadded ( but_box )
