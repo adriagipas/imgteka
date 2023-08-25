@@ -99,6 +99,8 @@ func (self *Database) Close () {
 } // end Close
 
 
+// PLATFORMS ///////////////////////////////////////////////////////////////////
+
 func (self *Database) LoadPlatforms ( plats *Platforms ) error {
 
   // Consulta base de dades
@@ -152,3 +154,31 @@ func (self *Database) RegisterPlatform(
   return nil
   
 } // end RegisterPlatform
+
+
+func (self *Database) DeletePlatform( id int ) error {
+
+  _,err:= self.conn.Exec ( `
+DELETE FROM PLATFORMS WHERE id=?;
+`, id )
+
+  return err
+  
+} // end DeletePlatform
+
+
+func (self *Database) UpdatePlatform(
+  id    int,
+  name  string,
+  r,g,b uint8,
+) error {
+
+  _,err:= self.conn.Exec ( `
+UPDATE PLATFORMS SET name = ?, color_r = ?, color_g = ?, color_b = ?
+       WHERE id = ?;
+`, name, int(r), int(g), int(b), id )
+  
+  return err
+  
+} // end UpdatePlatform
+

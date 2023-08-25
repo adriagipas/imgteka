@@ -114,6 +114,11 @@ func (self *Model) AddPlatform(
 } // end AddPlatform
 
 
+func (self *Model) RemovePlatform( id int ) error {
+  return self.plats.Remove ( id )
+} // end RemovePlatform
+
+
 /// TODO!!!!!!!!!!!!!!!!!!!!! /////////////////////////////////////////////////
 type _Entry struct {}
 func (self *_Entry) GetName() string {return "Fake name"}

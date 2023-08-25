@@ -42,6 +42,56 @@ import (
 /* PART PRIVADA */
 /****************/
 
+func showEditPlatform (
+  plat     Platform,
+  main_win fyne.Window,
+  list     *widget.List,
+) {
+
+  // Nom llarg
+  name:= widget.NewEntry ()
+  name.Text= plat.GetName ()
+  name.Validator= validation.NewRegexp ( `^.+$`,
+    "el nom ha de contindre almenys un caràcter" )
+
+  // Color
+  var mcolor color.Color
+  mcolor= plat.GetColor ()
+  color_rect:= canvas.NewRectangle ( mcolor )
+  color_rect.SetMinSize ( fyne.Size{30,1} )
+  color_but:= widget.NewButton ( "Selecciona", func(){} )
+  color_box:= container.NewHBox ( color_rect,
+    widget.NewSeparator (), color_but )
+  color_but.OnTapped= func(){
+    picker:= dialog.NewColorPicker ( "Selecciona un color",
+      "Selecciona un color", func(c color.Color){
+        mcolor= c
+        color_rect= canvas.NewRectangle ( mcolor )
+        color_rect.SetMinSize ( fyne.Size{30,1} )
+        color_box.Objects[0]= color_rect
+      }, main_win )
+    picker.Advanced= true
+    picker.Show ()
+  }
+  
+  // Dialeg
+  items:= []*widget.FormItem{
+    widget.NewFormItem ( "Nom", name ),
+    widget.NewFormItem ( "Color", color_box ),
+  }
+  dialog.ShowForm ( "Edita plataforma", "Aplica", "Cancel·la", items,
+    func(b bool){
+      if !b { return }
+      if err:= plat.Update ( name.Text, mcolor ); err != nil {
+        dialog.ShowError ( err, main_win )
+      } else {
+        list.Refresh ()
+      }
+    }, main_win )
+  
+} // end showEditPlatform
+
+
 func showNewPlatform (
   model    DataModel,
   main_win fyne.Window,
@@ -50,7 +100,7 @@ func showNewPlatform (
 
   // Nom curt
   shortname:= widget.NewEntry ()
-  shortname.Validator= validation.NewRegexp ( `^[A-Za-z]{1,3}$`,
+  shortname.Validator= validation.NewRegexp ( `^[A-Za-z0-9]{1,3}$`,
     "el nom curt sols pot contindre majúscules, un mínim d'un caràcter"+
       " i un màxim de tres" )
 
@@ -122,7 +172,13 @@ func createPlatformItemTemplate () fyne.CanvasObject {
 } // end createPlatformItemTemplate
 
 
-func updatePlatformItem ( co fyne.CanvasObject, model DataModel, id int ) {
+func updatePlatformItem (
+  co       fyne.CanvasObject,
+  model    DataModel,
+  id       int,
+  list     *widget.List,
+  main_win fyne.Window,
+) {
 
   // Prepara
   plats:= model.GetPlatformIDs ()
@@ -145,14 +201,24 @@ func updatePlatformItem ( co fyne.CanvasObject, model DataModel, id int ) {
     but_del.OnTapped= func() {}
   } else {
     but_del.OnTapped= func() {
-      fmt.Printf ( "Esborra %v (%d)\n", plat, plats[id] )
+      dialog.ShowConfirm ( "Esborra plataforma",
+        "Està segur que vol esborrar la plataforma?",
+        func(ok bool) {
+          if ok {
+            if err:= model.RemovePlatform ( plats[id] ); err != nil {
+              dialog.ShowError ( err, main_win )
+            } else {
+              list.Refresh ()
+            }
+          }
+        }, main_win )
     }
   }
-
+  
   // Edita
   but_edit:= but_box.Objects[0].(*widget.Button)
   but_edit.OnTapped= func() {
-    fmt.Printf ( "Edita %v\n", plat )
+    showEditPlatform ( plat, main_win, list )
   }
   
 } // end updatePlatformItem
@@ -171,23 +237,20 @@ func NewPlatformsManager (
   
   // Llista plataformes
   list:= widget.NewList (
-    
-    // length
-    func() int {
-      return len(model.GetPlatformIDs ())
-    },
-
-    // createItem
-    func() fyne.CanvasObject {
-      return createPlatformItemTemplate ()
-    },
-
-    // updateItem
-    func( id widget.ListItemID, w fyne.CanvasObject ) {
-      updatePlatformItem ( w, model, id )
-    },
+    func() int {return -1},
+    func() fyne.CanvasObject {return nil},
+    func(id widget.ListItemID,w fyne.CanvasObject){},
   )
-
+  list.Length= func() int {
+    return len(model.GetPlatformIDs ())
+  }
+  list.CreateItem= func() fyne.CanvasObject {
+    return createPlatformItemTemplate ()
+  }
+  list.UpdateItem= func( id widget.ListItemID, w fyne.CanvasObject ) {
+    updatePlatformItem ( w, model, id, list, main_win )
+  }
+  
   // Botonera
   but_new:= widget.NewButtonWithIcon ( "Nova Plataforma",
     theme.ContentAddIcon (), func(){

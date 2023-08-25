@@ -150,6 +150,42 @@ func (self *Platforms) Add(
 } // end Add
 
 
+func (self *Platforms) Remove( id int ) error {
+
+  // Comprova que és una plataforma que no s'utilitza
+  plat:= self.v[id]
+  if plat == nil {
+    return fmt.Errorf ( "La plataforma indicada (%d) no existeix", id )
+  }
+  if plat.GetNumFiles() > 0 {
+    return errors.New ( "No es pot esborrar la plataforma perquè està en ús" )
+  }
+
+  // Elimina i reseteja.
+  if err:= self.db.DeletePlatform ( id ); err != nil {
+    return fmt.Errorf ( "No s'ha pogut esborrar la plataforma: %s", err )
+  }
+  self.reset ()
+  
+  return nil
+  
+} // end Remove
+
+func (self *Platforms) UpdatePlatform(
+  id    int,
+  name  string,
+  r,g,b uint8,
+) error {
+
+  if err:= self.db.UpdatePlatform ( id, name, r, g, b ); err != nil {
+    return fmt.Errorf ( "No s'ha pogut actualitzar la plataforma: %s", err )
+  }
+
+  return nil
+  
+} // end UpdatePlatform
+
+
 type Platform struct {
   plats      *Platforms
   id         int // Identificador intern
@@ -168,3 +204,31 @@ func (self *Platform) GetNumFiles() int64 {
   fmt.Println ( "TODO Platform.GetNumFiles !!!" )
   return 0
 }
+
+
+func (self *Platform) Update( name string, c color.Color ) error {
+
+  // Processa nom
+  name= strings.TrimSpace ( name )
+  if len(name) == 0 {
+    return errors.New ( "No s'ha especificat un nom" )
+  }
+
+  // Color
+  r,g,b,_:= c.RGBA ()
+  r8:= uint8((float32(r)/65535.0)*255.0 + 0.5)
+  g8:= uint8((float32(g)/65535.0)*255.0 + 0.5)
+  b8:= uint8((float32(b)/65535.0)*255.0 + 0.5)
+
+  // Intenta actualitzar en la base de dades
+  if err:= self.plats.UpdatePlatform ( self.id, name, r8, g8, b8 ); err != nil {
+    return err
+  }
+  
+  // Modifica els atributs "cached"
+  self.color= c
+  self.name= name
+  
+  return nil
+  
+} // end Update
