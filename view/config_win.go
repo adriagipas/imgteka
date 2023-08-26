@@ -37,7 +37,14 @@ import (
 /* PART PÚBLICA */
 /****************/
 
-func RunConfigWin ( model DataModel, main_win fyne.Window ) {
+func RunConfigWin (
+
+  model    DataModel,
+  list     *List,
+  dv       *DetailsViewer,
+  main_win fyne.Window,
+
+) {
 
   // Crea PopUP amb una caixa buida
   pop_box:= container.NewMax ()
@@ -47,7 +54,7 @@ func RunConfigWin ( model DataModel, main_win fyne.Window ) {
   // --> Pestanyes
   plats_tab:= container.NewTabItem (
     "Plataformes",
-    container.NewPadded ( NewPlatformsManager ( model, main_win ) ),
+    container.NewPadded ( NewPlatformsManager ( model, list, dv, main_win ) ),
   )
   tabs:= container.NewAppTabs ( plats_tab )
   

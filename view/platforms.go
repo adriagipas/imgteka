@@ -43,9 +43,13 @@ import (
 /****************/
 
 func showEditPlatform (
+  
   plat     Platform,
   main_win fyne.Window,
+  list_win *List,
+  dv       *DetailsViewer,
   list     *widget.List,
+  
 ) {
 
   // Nom llarg
@@ -86,6 +90,8 @@ func showEditPlatform (
         dialog.ShowError ( err, main_win )
       } else {
         list.Refresh ()
+        list_win.Update ()
+        dv.Update ()
       }
     }, main_win )
   
@@ -173,11 +179,15 @@ func createPlatformItemTemplate () fyne.CanvasObject {
 
 
 func updatePlatformItem (
+  
   co       fyne.CanvasObject,
   model    DataModel,
+  list_win *List,
+  dv       *DetailsViewer,
   id       int,
   list     *widget.List,
   main_win fyne.Window,
+  
 ) {
 
   // Prepara
@@ -191,15 +201,16 @@ func updatePlatformItem (
   box.Objects[0]= label
 
   // Nom
-  text:= fmt.Sprintf ( "%s (%d)", plat.GetName (), plat.GetNumFiles () )
+  text:= fmt.Sprintf ( "%s (%d)", plat.GetName (), plat.GetNumEntries () )
   box.Objects[1].(*widget.Label).SetText ( text )
 
   // Esborra
   but_del:= but_box.Objects[1].(*widget.Button)
-  if plat.GetNumFiles () > 0 {
+  if plat.GetNumEntries () > 0 {
     but_del.Disable ()
     but_del.OnTapped= func() {}
   } else {
+    but_del.Enable ()
     but_del.OnTapped= func() {
       dialog.ShowConfirm ( "Esborra plataforma",
         "Està segur que vol esborrar la plataforma?",
@@ -218,7 +229,7 @@ func updatePlatformItem (
   // Edita
   but_edit:= but_box.Objects[0].(*widget.Button)
   but_edit.OnTapped= func() {
-    showEditPlatform ( plat, main_win, list )
+    showEditPlatform ( plat, main_win, list_win, dv, list )
   }
   
 } // end updatePlatformItem
@@ -231,8 +242,12 @@ func updatePlatformItem (
 /****************/
 
 func NewPlatformsManager (
-  model DataModel,
+  
+  model    DataModel,
+  list_win *List,
+  dv       *DetailsViewer,
   main_win fyne.Window,
+  
 ) fyne.CanvasObject {
   
   // Llista plataformes
@@ -248,7 +263,7 @@ func NewPlatformsManager (
     return createPlatformItemTemplate ()
   }
   list.UpdateItem= func( id widget.ListItemID, w fyne.CanvasObject ) {
-    updatePlatformItem ( w, model, id, list, main_win )
+    updatePlatformItem ( w, model, list_win, dv, id, list, main_win )
   }
   
   // Botonera

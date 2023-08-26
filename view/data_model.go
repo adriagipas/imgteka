@@ -94,9 +94,9 @@ type Platform interface {
   // Torna el color assignat a la plataforma
   GetColor() color.Color
 
-  // Torna el nombre de fitxers
-  GetNumFiles() int64
-
+  // Torna el nombre d'entrades
+  GetNumEntries() int64
+  
   // Actualitza els atributs bàsics d'una plataforma. (No es pot
   // modificar el nom curt)
   Update(name string,c color.Color) error
@@ -130,7 +130,13 @@ type DataModel interface {
   // Afegeix una nova plataforma
   AddPlatform(short_name string,name string,c color.Color) error
 
+  // Afegeix una nova entrada
+  AddEntry(name string,platform_id int) error
+
   // Elimina una plataforma
   RemovePlatform(id int) error
+
+  // Elimina una entrada
+  RemoveEntry(id int64) error
   
 }

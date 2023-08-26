@@ -127,17 +127,26 @@ type _Factory struct {
   model           DataModel
   dv              *DetailsViewer
   platform_labels map[int]fyne.CanvasObject
+  list            *List
 }
 
 
 func newFactory (
+  
   model DataModel,
   dv    *DetailsViewer,
+  list  *List,
+  
 ) *_Factory {
   plat:= make(map[int]fyne.CanvasObject)
-  ret:= _Factory{model,dv,plat}
+  ret:= _Factory{model,dv,plat,list}
   return &ret
 }
+
+
+func (self *_Factory) Reset() {
+  self.platform_labels= make(map[int]fyne.CanvasObject)
+} // end ResetCache
 
 
 func (self *_Factory) getPlatformLabel(id int) fyne.CanvasObject {
@@ -162,7 +171,7 @@ func (self *_Factory) setEntryView (
 ) {
 
   cont:= o.(*fyne.Container)
-
+  
   // Etiqueta plataforma
   cont.Objects[0]= self.getPlatformLabel ( e.GetPlatformID () )
   
@@ -234,13 +243,11 @@ func (self *_Factory) onSelected ( id widget.TreeNodeID ) {
   if id[0] == 'E' { // Entrada
     id,err:= strconv.ParseInt ( id[1:], 10, 64 )
     if err != nil { log.Fatal ( err ) }
-    e:= self.model.GetEntry ( id )
-    self.dv.ViewEntry ( e )
+    self.dv.ViewEntry ( id, self.list )
   } else if id[0] == 'F' { // Fitxer
     id,err:= strconv.ParseInt ( id[1:], 10, 64 )
     if err != nil { log.Fatal ( err ) }
-    f:= self.model.GetFile ( id )
-    self.dv.ViewFile ( f )
+    self.dv.ViewFile ( id )
   } else { // ¿¿??
     log.Fatal ( "list.go - onSelected - WTF!!!" )
   }
@@ -255,30 +262,42 @@ func (self *_Factory) onSelected ( id widget.TreeNodeID ) {
 
 type List struct {
   widget.Tree
+  f *_Factory
 }
 
 
 func NewList ( model DataModel, dv *DetailsViewer ) *List {
 
-  f:= newFactory ( model, dv )
   ret:= &List{}
   ret.ExtendBaseWidget ( ret )
+  ret.f= newFactory ( model, dv, ret )
   ret.ChildUIDs= func(id widget.TreeNodeID) []widget.TreeNodeID {
-    return f.childUIDs ( id )
+    return ret.f.childUIDs ( id )
   }
   ret.IsBranch= func(id widget.TreeNodeID) bool {
-    return f.isBranch ( id )
+    return ret.f.isBranch ( id )
   }
   ret.CreateNode= func(branch bool) fyne.CanvasObject {
-    return f.create ( branch )
+    return ret.f.create ( branch )
   }
   ret.UpdateNode= func(id widget.TreeNodeID, branch bool, o fyne.CanvasObject) {
-    f.update ( id, branch, o )
+    ret.f.update ( id, branch, o )
   }
   ret.OnSelected= func(id widget.TreeNodeID) {
-    f.onSelected ( id )
+    ret.f.onSelected ( id )
   }
   
   return ret
   
 } // end GetList
+
+
+// Reseteja caches locals i fa un Refresh. És útil per exemple si hem
+// modificat el color de les etiquetes. Si no ho hem fet, és més òptim
+// fer un Refresh.
+func (self *List) Update() {
+
+  self.f.Reset ()
+  self.Refresh ()
+  
+} // end Update

@@ -46,13 +46,13 @@ func Run ( model DataModel ) error {
   statusbar:= NewStatusBar ( model )
   
   // Construeix elements
-  dv:= NewDetailsViewer ( model )
+  dv:= NewDetailsViewer ( model, statusbar, win )
   list:= NewList ( model, dv )
   split:= container.NewHSplit ( list, dv.GetCanvas () )
   split.Offset= 0.65
 
   // Barra cerca i menú
-  toolbar:= NewToolbar ( model, win, list, statusbar )
+  toolbar:= NewToolbar ( model, win, list, dv, statusbar )
 
   // Content
   mbox:= container.NewBorder (
@@ -77,4 +77,4 @@ func Run ( model DataModel ) error {
   
   return nil
   
-}
+} // end Run

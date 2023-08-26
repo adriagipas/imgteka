@@ -29,6 +29,7 @@ import (
   "fyne.io/fyne/v2"
   "fyne.io/fyne/v2/canvas"
   "fyne.io/fyne/v2/container"
+  "fyne.io/fyne/v2/dialog"
   "fyne.io/fyne/v2/theme"
   "fyne.io/fyne/v2/widget"
 )
@@ -39,6 +40,10 @@ import (
 /****************/
 /* PART PRIVADA */
 /****************/
+
+const _DETAILS_VIEWER_EMPTY = 0
+const _DETAILS_VIEWER_FILE  = 1
+const _DETAILS_VIEWER_ENTRY = 2
 
 func (self *DetailsViewer) newLabel ( id int ) fyne.CanvasObject {
 
@@ -66,16 +71,37 @@ func (self *DetailsViewer) newLabel ( id int ) fyne.CanvasObject {
 /****************/
 
 type DetailsViewer struct {
-  root  *fyne.Container // Contenedor intern que es modifica
-  model DataModel
+  
+  root      *fyne.Container // Contenedor intern que es modifica
+  model     DataModel
+  statusbar *StatusBar
+  win       fyne.Window
+
+  // Estat
+  state      int
+  current_fe int64
+  list       *List // El que s'utilitza si estem en mode Entry
+  
 }
 
 
-func NewDetailsViewer ( model DataModel ) *DetailsViewer {
+func NewDetailsViewer (
+
+  model     DataModel,
+  statusbar *StatusBar,
+  main_win  fyne.Window,
+
+) *DetailsViewer {
 
   ret:= DetailsViewer{
-    root : container.NewVBox (),
-    model : model,
+    root      : container.NewVBox (),
+    model     : model,
+    statusbar : statusbar,
+    win       : main_win,
+
+    state      : _DETAILS_VIEWER_EMPTY,
+    current_fe : -1,
+    
   }
   
   return &ret
@@ -86,10 +112,24 @@ func NewDetailsViewer ( model DataModel ) *DetailsViewer {
 func (self *DetailsViewer) GetCanvas() fyne.CanvasObject { return self.root }
 
 
-func (self *DetailsViewer) ViewEntry ( e Entry ) {
+func (self *DetailsViewer) Clean() {
+
+  self.root.RemoveAll ()
+  self.state= _DETAILS_VIEWER_EMPTY
+  
+} // end Clean
+
+
+func (self *DetailsViewer) ViewEntry ( e_id int64, list *List ) {
   
   // Neteja
-  self.root.RemoveAll ()
+  self.Clean ()
+  self.state= _DETAILS_VIEWER_ENTRY
+  self.current_fe= e_id
+  self.list= list
+
+  // Obté entry
+  e:= self.model.GetEntry ( e_id )
   
   // Crea card
   // --> Contingut
@@ -135,7 +175,19 @@ func (self *DetailsViewer) ViewEntry ( e Entry ) {
       fmt.Println ( "EDIT BUTTON!!!!" )
     }),
     widget.NewToolbarAction ( theme.DeleteIcon (), func() {
-      fmt.Println ( "DELETE BUTTON!!!!" )
+      dialog.ShowConfirm ( "Esborra entrada",
+        "Està segur que vol esborrar l'entrada?",
+        func(ok bool) {
+          if ok {
+            if err:= self.model.RemoveEntry ( e_id ); err != nil {
+              dialog.ShowError ( err, self.win )
+            } else {
+              self.Clean ()
+              self.list.Refresh ()
+              self.statusbar.Update ()
+            }
+          }
+        }, self.win )
     }),
   )
   
@@ -146,12 +198,16 @@ func (self *DetailsViewer) ViewEntry ( e Entry ) {
 } // end ViewEntry
 
 
-func (self *DetailsViewer) ViewFile ( f File ) {
+func (self *DetailsViewer) ViewFile ( f_id int64 ) {
   
   // Neteja
-  self.root.RemoveAll ()
+  self.Clean ()
+  self.state= _DETAILS_VIEWER_FILE
+  self.current_fe= f_id
 
-
+  // Obté fitxer
+  f:= self.model.GetFile ( f_id )
+  
   // Contingut
   text_tmp:= ""
   md:= f.GetMetadata ()
@@ -188,3 +244,18 @@ func (self *DetailsViewer) ViewFile ( f File ) {
   self.root.Add ( tmp )
   
 } // end ViewFile
+
+
+func (self *DetailsViewer) Update() {
+
+  switch self.state {
+    
+  case _DETAILS_VIEWER_FILE:
+    self.ViewFile ( self.current_fe )
+
+  case _DETAILS_VIEWER_ENTRY:
+    self.ViewEntry ( self.current_fe, self.list )
+    
+  }
+  
+} // end Update

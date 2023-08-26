@@ -48,6 +48,7 @@ func NewToolbar (
   model      DataModel,
   main_win   fyne.Window,
   list       *List,
+  dv         *DetailsViewer,
   status_bar *StatusBar,
   
 ) *Toolbar {
@@ -75,7 +76,7 @@ func NewToolbar (
   // Botó configuració
   conf_but:= widget.NewButtonWithIcon ( "", theme.SettingsIcon (),
     func(){
-      RunConfigWin ( model, main_win )
+      RunConfigWin ( model, list, dv, main_win )
     })
   
   // Afegeix

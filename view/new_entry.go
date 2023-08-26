@@ -67,7 +67,13 @@ func ShowNewEntryDialog(
   d:= dialog.NewForm ( "Nova entrada", "Afegeix", "Cancel·la", items,
     func(b bool){
       if !b { return }
-      fmt.Println ( "HOOOOLA", name.Text, plat_text2id[plat_sel.Selected] )
+      if err:= model.AddEntry ( name.Text,
+        plat_text2id[plat_sel.Selected] ); err != nil {
+        dialog.ShowError ( err, main_win )
+      } else {
+        list.Refresh ()
+        statusbar.Update ()
+      }
     }, main_win )
   win_size:= main_win.Content ().Size ()
   d.Resize ( fyne.Size{win_size.Width*0.4,win_size.Height*0.4} )

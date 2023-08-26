@@ -25,6 +25,7 @@ package model
 import (
   "database/sql"
   _ "github.com/mattn/go-sqlite3"
+  "errors"
   "log"
 )
 
@@ -51,8 +52,8 @@ CREATE TABLE IF NOT EXISTS ENTRIES (
        id INTEGER PRIMARY KEY,
        name TEXT NOT NULL,
        platform_id INTEGER NOT NULL,
-       cover_id INTEGER DEFAULT NULL,
-       UNIQUE (id,name),
+       cover_id INTEGER DEFAULT -1,
+       UNIQUE (platform_id,name),
        FOREIGN KEY (platform_id)
                REFERENCES PLATFORMS (id)
                ON DELETE CASCADE
@@ -119,9 +120,68 @@ func (self *Database) Close () {
 } // end Close
 
 
+// NOTA!!! Aquesta funció caldrà actualitzar-la quan afegim els
+// filtres de cerca.
+func (self *Database) GetNumEntries() (int64,error) {
+
+    // Consulta base de dades
+  rows,err:= self.conn.Query ( `
+SELECT COUNT(*)
+FROM ENTRIES;
+` )
+  if err != nil { return -1,err }
+  defer rows.Close ()
+
+  // Recorre consulta
+  if !rows.Next () {
+    return -1,errors.New ( "Error inesperat en Database.GetNumEntries" )
+  }
+  var ret int64
+  err= rows.Scan ( &ret )
+  if err != nil { return -1,err }
+  
+  return ret,rows.Err ()
+  
+} // end GetNumEntries
+
+
 // PLATFORMS ///////////////////////////////////////////////////////////////////
 
-func (self *Database) LoadPlatforms ( plats *Platforms ) error {
+func (self *Database) DeletePlatform( id int ) error {
+
+  _,err:= self.conn.Exec ( `
+DELETE FROM PLATFORMS WHERE id=?;
+`, id )
+
+  return err
+  
+} // end DeletePlatform
+
+
+func (self *Database) GetPlatformNumEntries( id int ) (int64,error) {
+
+  // Consulta base de dades
+  rows,err:= self.conn.Query ( `
+SELECT COUNT(CASE WHEN platform_id = ? THEN id END)
+FROM ENTRIES;
+`, id )
+  if err != nil { return -1,err }
+  defer rows.Close ()
+
+  // Recorre consulta
+  if !rows.Next () {
+    return -1,errors.New ( "Error inesperat en Database.GetPlatformEntries" )
+  }
+  var ret int64
+  err= rows.Scan ( &ret )
+  if err != nil { return -1,err }
+  
+  return ret,rows.Err ()
+  
+} // end GetPlatformNumEntries
+
+
+func (self *Database) LoadPlatforms( plats *Platforms ) error {
 
   // Consulta base de dades
   rows,err:= self.conn.Query ( `
@@ -167,24 +227,13 @@ func (self *Database) RegisterPlatform(
 
   // Inserta
   _,err= stmt.Exec ( short_name, name, int(r), int(g), int(b) )
-  if err != nil { return err }
+  if err != nil { tx.Rollback (); return err }
   err= tx.Commit ()
   if err != nil { return err }
 
   return nil
   
 } // end RegisterPlatform
-
-
-func (self *Database) DeletePlatform( id int ) error {
-
-  _,err:= self.conn.Exec ( `
-DELETE FROM PLATFORMS WHERE id=?;
-`, id )
-
-  return err
-  
-} // end DeletePlatform
 
 
 func (self *Database) UpdatePlatform(
@@ -202,3 +251,71 @@ UPDATE PLATFORMS SET name = ?, color_r = ?, color_g = ?, color_b = ?
   
 } // end UpdatePlatform
 
+
+// ENTRIES /////////////////////////////////////////////////////////////////////
+
+func (self *Database) DeleteEntry( id int64 ) error {
+
+  _,err:= self.conn.Exec ( `
+DELETE FROM ENTRIES WHERE id=?;
+`, id )
+
+  return err
+  
+} // end DeleteEntry
+
+
+// NOTA!!! En algun moment caldrà ficar la query.
+// NOTA!!! Sols es carreguen les dades bàsiques.
+func (self *Database) LoadEntries( entries *Entries ) error {
+
+  // Consulta base de dades
+  rows,err:= self.conn.Query ( `
+SELECT id,name,platform_id,cover_id
+FROM ENTRIES
+ORDER BY name ASC;
+` )
+  if err != nil { return err }
+  defer rows.Close ()
+
+  // Recorre consulta
+  for rows.Next () {
+    var id,cover_id int64
+    var name string
+    var platform_id int
+    err= rows.Scan ( &id, &name, &platform_id, &cover_id )
+    if err != nil { return err }
+    entries.add ( id, name, platform_id, cover_id )
+  }
+  
+  return rows.Err ()
+  
+} // end LoadEntries
+
+
+func (self *Database) RegisterEntry(
+
+  name        string,
+  platform_id int,
+  
+) error {
+
+  // Prepara
+  tx,err:= self.conn.Begin ()
+  if err != nil { log.Fatal ( err ) }
+  stmt,err:= tx.Prepare ( `
+   INSERT INTO ENTRIES(name, platform_id)
+          VALUES(?,?);
+` )
+  if err != nil { log.Fatal ( err ) }
+  defer stmt.Close ()
+
+  // Inserta
+  _,err= stmt.Exec ( name, platform_id )
+  if err != nil { tx.Rollback (); return err }
+  err= tx.Commit ()
+  if err != nil { return err }
+
+  return nil
+  
+} // end RegisterEntry

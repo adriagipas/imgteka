@@ -150,6 +150,16 @@ func (self *Platforms) Add(
 } // end Add
 
 
+func (self *Platforms) GetNumEntriesPlatform( id int ) int64 {
+
+  ret,err:= self.db.GetPlatformNumEntries ( id )
+  if err != nil { log.Fatal ( err ) }
+
+  return ret
+  
+} // end GetNumEntriesPlatform
+
+
 func (self *Platforms) Remove( id int ) error {
 
   // Comprova que és una plataforma que no s'utilitza
@@ -157,7 +167,7 @@ func (self *Platforms) Remove( id int ) error {
   if plat == nil {
     return fmt.Errorf ( "La plataforma indicada (%d) no existeix", id )
   }
-  if plat.GetNumFiles() > 0 {
+  if plat.GetNumEntries() > 0 {
     return errors.New ( "No es pot esborrar la plataforma perquè està en ús" )
   }
 
@@ -200,10 +210,9 @@ func (self *Platform) GetShortName() string { return self.short_name }
 func (self *Platform) GetColor() color.Color { return self.color }
 
 
-func (self *Platform) GetNumFiles() int64 {
-  fmt.Println ( "TODO Platform.GetNumFiles !!!" )
-  return 0
-}
+func (self *Platform) GetNumEntries() int64 {
+  return self.plats.GetNumEntriesPlatform ( self.id )
+} // end GetNumEntries
 
 
 func (self *Platform) Update( name string, c color.Color ) error {
