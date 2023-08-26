@@ -42,6 +42,9 @@ func Run ( model DataModel ) error {
   win:= a.NewWindow ( "imgteka" )
   win.CenterOnScreen ()
 
+  // StatusBar
+  statusbar:= NewStatusBar ( model )
+  
   // Construeix elements
   dv:= NewDetailsViewer ( model )
   list:= NewList ( model, dv )
@@ -49,10 +52,7 @@ func Run ( model DataModel ) error {
   split.Offset= 0.65
 
   // Barra cerca i menú
-  toolbar:= NewToolbar ( model, win )
-
-  // StatusBar
-  statusbar:= NewStatusBar ( model )
+  toolbar:= NewToolbar ( model, win, list, statusbar )
 
   // Content
   mbox:= container.NewBorder (

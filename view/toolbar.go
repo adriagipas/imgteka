@@ -43,7 +43,14 @@ type Toolbar struct {
 }
 
 
-func NewToolbar ( model DataModel, main_win fyne.Window ) *Toolbar {
+func NewToolbar (
+  
+  model      DataModel,
+  main_win   fyne.Window,
+  list       *List,
+  status_bar *StatusBar,
+  
+) *Toolbar {
 
   // Crea
   ret:= Toolbar{
@@ -62,7 +69,7 @@ func NewToolbar ( model DataModel, main_win fyne.Window ) *Toolbar {
   // Boto afegir
   add_but:= widget.NewButtonWithIcon ( "", theme.FolderNewIcon (),
     func(){
-      fmt.Println ( "AFEGEIX!!!" )
+      ShowNewEntryDialog ( model, list, status_bar, main_win )
     })
 
   // Botó configuració

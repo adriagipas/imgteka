@@ -46,6 +46,23 @@ CREATE TABLE IF NOT EXISTS PLATFORMS (
 );
 `
 
+const _CREATE_ENTRIES= `
+CREATE TABLE IF NOT EXISTS ENTRIES (
+       id INTEGER PRIMARY KEY,
+       name TEXT NOT NULL,
+       platform_id INTEGER NOT NULL,
+       cover_id INTEGER DEFAULT NULL,
+       UNIQUE (id,name),
+       FOREIGN KEY (platform_id)
+               REFERENCES PLATFORMS (id)
+               ON DELETE CASCADE
+               ON UPDATE NO ACTION,
+       FOREIGN KEY (cover_id)
+               REFERENCES FILES (id)
+               ON UPDATE NO ACTION
+);
+`
+
 
 func initDatabase ( dirs *Dirs ) (*sql.DB,error) {
 
@@ -59,6 +76,9 @@ func initDatabase ( dirs *Dirs ) (*sql.DB,error) {
 
   // Crea taules si cal
   if _,err:= db.Exec ( _CREATE_PLATFORMS ); err != nil {
+    return nil,err
+  }
+  if _,err:= db.Exec ( _CREATE_ENTRIES ); err != nil {
     return nil,err
   }
   
