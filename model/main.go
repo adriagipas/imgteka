@@ -48,7 +48,7 @@ func New() (*Model,error) {
   db,err:= NewDatabase ( dirs )
   if err != nil { return nil,err }
   plats:= NewPlatforms ( db )
-  entries:= NewEntries ( db )
+  entries:= NewEntries ( db, plats, dirs )
   stats:= NewStats ( db )
   
   // Crea model

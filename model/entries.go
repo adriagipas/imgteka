@@ -28,6 +28,7 @@ import (
   "fmt"
   "image"
   "log"
+  "os"
   "strings"
 )
 
@@ -80,18 +81,22 @@ func (self *Entries) reset() {
 /****************/
 
 type Entries struct {
-  db  *Database
-  ids []int64
-  v   map[int64]*Entry
+  db    *Database
+  plats *Platforms
+  dirs  *Dirs
+  ids   []int64
+  v     map[int64]*Entry
 }
 
 
-func NewEntries ( db *Database ) *Entries {
+func NewEntries ( db *Database, plats *Platforms, dirs *Dirs ) *Entries {
 
   ret:= Entries{
-    db  : db,
-    ids : nil,
-    v   : nil,
+    db    : db,
+    dirs  : dirs,
+    plats : plats,
+    ids   : nil,
+    v     : nil,
   }
   ret.reset ()
 
@@ -108,12 +113,31 @@ func (self *Entries) Add( name string, platform_id int ) error {
     return errors.New ( "No s'ha especificat un nom" )
   }
 
-  // Registra i reseteja
-  if err:= self.db.RegisterEntry ( name, platform_id ); err != nil {
+  // Intenta registrar
+  // --> Intenta transacció
+  if err:= self.db.RegisterEntryWithoutCommit (
+    name, platform_id ); err != nil {
     return fmt.Errorf ( "No s'ha pogut registrar la nova entrada: %s", err )
   }
+  // --> Intenta creació directòri
+  plat:= self.plats.GetPlatform ( platform_id )
+  dir_path,err:= self.dirs.GetEntryFolder ( plat.GetShortName (), name )
+  if err != nil {
+    err2:= self.db.RollbackLastTransaction ()
+    if err2 != nil { log.Fatal ( err2 ) }
+    return err
+  }
+  // --> Finalitza transacció
+  err= self.db.CommitLastTransaction ()
+  if err != nil {
+    err2:= os.Remove ( dir_path )
+    if err2 != nil { log.Fatal ( err2 ) }
+    return err
+  }
+  
+  // Reseteja
   self.reset ()
-
+  
   return nil
   
 } // end Add
@@ -139,11 +163,31 @@ func (self *Entries) Remove( id int64 ) error {
   if len(e.GetFileIDs ()) > 0 {
     return errors.New ( "No es pot esborrar una entrada amb fitxers" )
   }
-
-  // Elimina i reseteja
-  if err:= self.db.DeleteEntry ( id ); err != nil {
+  
+  // Elimina
+  // --> Intenta transacció
+  if err:= self.db.DeleteEntryWithoutCommit ( id ); err != nil {
     return fmt.Errorf ( "No s'ha pogut esborrar l'entrada: %s", err )
   }
+  // --> Intenta eliminar directori
+  plat:= self.plats.GetPlatform ( e.GetPlatformID () )
+  dir_path,err:= self.dirs.GetEntryFolder ( plat.GetShortName (), e.GetName () )
+  if err != nil {
+    err2:= self.db.RollbackLastTransaction ()
+    if err2 != nil { log.Fatal ( err2 ) }
+    return err
+  }
+  err= os.Remove ( dir_path )
+  if err != nil {
+    err2:= self.db.RollbackLastTransaction ()
+    if err2 != nil { log.Fatal ( err2 ) }
+    return err
+  }
+  // --> Finalitza transacció
+  err= self.db.CommitLastTransaction ()
+  if err != nil { log.Fatal ( err ) }
+  
+  // Reseteja
   self.reset ()
 
   return nil

@@ -95,7 +95,8 @@ func initDatabase ( dirs *Dirs ) (*sql.DB,error) {
 /****************/
 
 type Database struct {
-  conn *sql.DB
+  conn    *sql.DB
+  last_tx *sql.Tx
 }
 
 
@@ -107,7 +108,8 @@ func NewDatabase ( dirs *Dirs ) (*Database,error){
 
   // Crea objecte
   ret:= Database{
-    conn : conn,
+    conn    : conn,
+    last_tx : nil,
   }
 
   return &ret,nil
@@ -115,9 +117,22 @@ func NewDatabase ( dirs *Dirs ) (*Database,error){
 } // end NewDatabase
 
 
-func (self *Database) Close () {
+func (self *Database) Close() {
   self.conn.Close ()
 } // end Close
+
+
+func (self *Database) CommitLastTransaction() error {
+
+  if self.last_tx == nil {
+    return errors.New ( "No hi ha cap transacció pendent" )
+  }
+  err:= self.last_tx.Commit ()
+  self.last_tx= nil
+
+  return err
+  
+} // end CommitLastTransaction
 
 
 // NOTA!!! Aquesta funció caldrà actualitzar-la quan afegim els
@@ -143,6 +158,19 @@ FROM ENTRIES;
   return ret,rows.Err ()
   
 } // end GetNumEntries
+
+
+func (self *Database) RollbackLastTransaction() error {
+
+  if self.last_tx == nil {
+    return errors.New ( "No hi ha cap transacció pendent" )
+  }
+  err:= self.last_tx.Rollback ()
+  self.last_tx= nil
+  
+  return err
+  
+} // end RollbackLastTransaction
 
 
 // PLATFORMS ///////////////////////////////////////////////////////////////////
@@ -215,23 +243,12 @@ func (self *Database) RegisterPlatform(
   
 ) error {
 
-  // Prepara
-  tx,err:= self.conn.Begin ()
-  if err != nil { log.Fatal ( err ) }
-  stmt,err:= tx.Prepare ( `
+  _,err:= self.conn.Exec ( `
    INSERT INTO PLATFORMS(short_name, name, color_r, color_g, color_b)
           VALUES(?,?,?,?,?);
-` )
-  if err != nil { log.Fatal ( err ) }
-  defer stmt.Close ()
+`, short_name, name, r, g, b )
 
-  // Inserta
-  _,err= stmt.Exec ( short_name, name, int(r), int(g), int(b) )
-  if err != nil { tx.Rollback (); return err }
-  err= tx.Commit ()
-  if err != nil { return err }
-
-  return nil
+  return err
   
 } // end RegisterPlatform
 
@@ -254,15 +271,27 @@ UPDATE PLATFORMS SET name = ?, color_r = ?, color_g = ?, color_b = ?
 
 // ENTRIES /////////////////////////////////////////////////////////////////////
 
-func (self *Database) DeleteEntry( id int64 ) error {
+func (self *Database) DeleteEntryWithoutCommit( id int64 ) error {
 
-  _,err:= self.conn.Exec ( `
+  // Prepara
+  tx,err:= self.conn.Begin ()
+  if err != nil { log.Fatal ( err ) }
+  stmt,err:= tx.Prepare ( `
 DELETE FROM ENTRIES WHERE id=?;
-`, id )
-
-  return err
+` )
+  if err != nil { log.Fatal ( err ) }
+  defer stmt.Close ()
   
-} // end DeleteEntry
+  // Elimina
+  _,err= stmt.Exec ( id )
+  if err != nil { tx.Rollback (); return err }
+  
+  // Registra transacció
+  self.last_tx= tx
+  
+  return nil
+  
+} // end DeleteEntryWithoutCommit
 
 
 // NOTA!!! En algun moment caldrà ficar la query.
@@ -293,7 +322,7 @@ ORDER BY name ASC;
 } // end LoadEntries
 
 
-func (self *Database) RegisterEntry(
+func (self *Database) RegisterEntryWithoutCommit(
 
   name        string,
   platform_id int,
@@ -313,9 +342,10 @@ func (self *Database) RegisterEntry(
   // Inserta
   _,err= stmt.Exec ( name, platform_id )
   if err != nil { tx.Rollback (); return err }
-  err= tx.Commit ()
-  if err != nil { return err }
 
+  // Registra transacció
+  self.last_tx= tx
+  
   return nil
   
-} // end RegisterEntry
+} // end RegisterEntryWithoutCommit

@@ -36,6 +36,7 @@ import (
 /****************/
 
 const _ROOT_NAME= "imgteka"
+const _ROOT_ENTRIES= "entries"
 
 
 
@@ -78,3 +79,19 @@ func (self *Dirs) GetDatabaseName() (string,error) {
   return ret,err
   
 } // end GetDatabaseName
+
+
+func (self *Dirs) GetEntryFolder(
+  
+  platform string,
+  name     string,
+  
+) (string,error) {
+
+  mpath:= path.Join ( _ROOT_NAME, _ROOT_ENTRIES, platform, name, "kk.kk" )
+  ret,err:= xdg.DataFile ( mpath )
+  if err != nil { return "",err }
+
+  return path.Dir ( ret ),nil
+  
+} // end GetEntryFolder
