@@ -282,6 +282,80 @@ UPDATE PLATFORMS SET name = ?, color_r = ?, color_g = ?, color_b = ?
 } // end UpdatePlatform
 
 
+// LABELS //////////////////////////////////////////////////////////////////////
+
+func (self *Database) DeleteLabel( id int ) error {
+
+  _,err:= self.conn.Exec ( `
+DELETE FROM LABELS WHERE id=?;
+`, id )
+  
+  return err
+  
+} // end DeleteLabel
+
+
+func (self *Database) LoadLabels( labels *Labels ) error {
+
+  // Consulta base de dades
+  rows,err:= self.conn.Query ( `
+SELECT id,name,color_r,color_g,color_b
+FROM LABELS
+ORDER BY name ASC;
+` )
+  if err != nil { return err }
+  defer rows.Close ()
+
+  // Recorre consulta
+  for rows.Next () {
+    var id int
+    var name string
+    var r,g,b int
+    err= rows.Scan ( &id, &name, &r, &g, &b )
+    if err != nil { return err }
+    labels.add ( id, name, uint8(r), uint8(g), uint8(b) )
+  }
+  
+  return rows.Err ()
+  
+} // end LoadLabels
+
+
+func (self *Database) RegisterLabel(
+
+  name  string,
+  r,g,b uint8,
+  
+) error {
+
+  _,err:= self.conn.Exec ( `
+   INSERT INTO LABELS(name, color_r, color_g, color_b)
+          VALUES(?,?,?,?);
+`, name, r, g, b )
+
+  return err
+  
+} // end RegisterLabel
+
+
+func (self *Database) UpdateLabel(
+  
+  id    int,
+  name  string,
+  r,g,b uint8,
+  
+) error {
+
+  _,err:= self.conn.Exec ( `
+UPDATE LABELS SET name = ?, color_r = ?, color_g = ?, color_b = ?
+       WHERE id = ?;
+`, name, int(r), int(g), int(b), id )
+  
+  return err
+  
+} // end UpdateLabel
+
+
 // ENTRIES /////////////////////////////////////////////////////////////////////
 
 func (self *Database) DeleteEntryWithoutCommit( id int64 ) error {

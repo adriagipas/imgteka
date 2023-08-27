@@ -117,6 +117,9 @@ type Label interface {
 
   // Torna el nombre d'entrades
   GetNumEntries() int64
+
+  // Actualitza els atributs bàsics d'una etiqueta.
+  Update(name string,c color.Color) error
   
 }
 
@@ -151,12 +154,18 @@ type DataModel interface {
   // Afegeix una nova plataforma
   AddPlatform(short_name string,name string,c color.Color) error
 
+  // Afegeix una nova etiqueta
+  AddLabel(name string,c color.Color) error
+
   // Afegeix una nova entrada
   AddEntry(name string,platform_id int) error
 
   // Elimina una plataforma
   RemovePlatform(id int) error
 
+  // Elimina una etiqueta
+  RemoveLabel(id int) error
+  
   // Elimina una entrada
   RemoveEntry(id int64) error
   

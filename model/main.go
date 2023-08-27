@@ -36,6 +36,7 @@ type Model struct {
   dirs    *Dirs
   db      *Database
   plats   *Platforms
+  labels  *Labels
   entries *Entries
   stats   *Stats
 }
@@ -48,6 +49,7 @@ func New() (*Model,error) {
   db,err:= NewDatabase ( dirs )
   if err != nil { return nil,err }
   plats:= NewPlatforms ( db )
+  labels:= NewLabels ( db )
   entries:= NewEntries ( db, plats, dirs )
   stats:= NewStats ( db )
   
@@ -56,6 +58,7 @@ func New() (*Model,error) {
     dirs    : dirs,
     db      : db,
     plats   : plats,
+    labels  : labels,
     entries : entries,
     stats   : stats,
   }
@@ -97,14 +100,12 @@ func (self *Model) GetFile( id int64 ) view.File {
 
 
 func (self *Model) GetLabelIDs() []int {
-  fmt.Println ( "TODO GetLabelIDs !" )
-  return nil
+  return self.labels.GetIDs ()
 } // end GetLabelIDs
 
 
 func (self *Model) GetLabel( id int ) view.Label {
-  fmt.Println ( "TODO GetLabel !" )
-  return &_Label{}
+  return self.labels.Get ( id )
 } // end GetLabelInfo
 
 
@@ -122,6 +123,11 @@ func (self *Model) AddPlatform(
 } // end AddPlatform
 
 
+func (self *Model) AddLabel( name string, c color.Color ) error {
+  return self.labels.Add ( name, c )
+} // end AddLabel
+
+
 func (self *Model) AddEntry( name string, platform_id int ) error {
   return self.entries.Add ( name, platform_id )
 } // end AddEntry
@@ -130,6 +136,11 @@ func (self *Model) AddEntry( name string, platform_id int ) error {
 func (self *Model) RemovePlatform( id int ) error {
   return self.plats.Remove ( id )
 } // end RemovePlatform
+
+
+func (self *Model) RemoveLabel( id int ) error {
+  return self.labels.Remove ( id )
+} // end RemoveLabel
 
 
 func (self *Model) RemoveEntry( id int64 ) error {
@@ -142,7 +153,4 @@ type _File struct{}
 func (self *_File) GetName() string {return "Fake file"}
 func (self *_File) GetType() string {return "Fake type"}
 func (self *_File) GetMetadata() []view.StringPair {return make([]view.StringPair,0)}
-type _Label struct{}
-func (self *_Label) GetName() string {return "Fake label"}
-func (self *_Label) GetColor() color.Color {return color.Black}
-func (self *_Label) GetNumEntries() int64 {return 0}
+

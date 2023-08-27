@@ -85,15 +85,12 @@ func showEditLabel (
   dialog.ShowForm ( "Edita etiqueta", "Aplica", "Cancel·la", items,
     func(b bool){
       if !b { return }
-      fmt.Println ( "EDITA ETIQUETA!!" )
-      /*
-      if err:= plat.Update ( name.Text, mcolor ); err != nil {
+      if err:= label.Update ( name.Text, mcolor ); err != nil {
         dialog.ShowError ( err, main_win )
       } else {
         list.Refresh ()
         dv.Update ()
       }
-      */
     }, main_win )
   
 } // end showEditLabel
@@ -138,15 +135,11 @@ func showNewLabel (
   dialog.ShowForm ( "Etiqueta nova", "Afegeix", "Cancel·la", items,
     func(b bool){
       if !b { return }
-      fmt.Println ( "AFEGEIX ETIQUETA!!!!" )
-      /*
-      if err:= model.AddPlatform (
-        shortname.Text, name.Text, mcolor ); err != nil {
+      if err:= model.AddLabel ( name.Text, mcolor ); err != nil {
         dialog.ShowError ( err, main_win )
       } else {
         list.Refresh ()
       }
-      */
     }, main_win )
   
 } // end showNewLabel
@@ -213,16 +206,13 @@ func updateLabelItem (
       dialog.ShowConfirm ( "Esborra etiqueta",
         "Està segur que vol esborrar l'etiqueta?",
         func(ok bool) {
-          fmt.Println ( "ESBORRA ETIQUETA!!!" )
-          /*
           if ok {
-            if err:= model.RemovePlatform ( plats[id] ); err != nil {
+            if err:= model.RemoveLabel ( labels[id] ); err != nil {
               dialog.ShowError ( err, main_win )
             } else {
               list.Refresh ()
             }
           }
-          */
         }, main_win )
     }
   }
