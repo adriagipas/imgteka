@@ -195,6 +195,53 @@ func (self *Entries) Remove( id int64 ) error {
 } // end Remove
 
 
+func (self *Entries) UpdateEntryName( id int64, name string ) error {
+
+  // Prepara
+  e:= self.v[id]
+  
+  // Intenta fer la transacció.
+  if err:= self.db.UpdateEntryNameWithoutCommit ( id, name ); err != nil {
+    return err
+  }
+  
+  // Intenta el canvi de nom de directori
+  plat:= self.plats.GetPlatform ( e.GetPlatformID () )
+  dir_path,err:= self.dirs.GetEntryFolder ( plat.GetShortName (), e.GetName () )
+  if err != nil {
+    err2:= self.db.RollbackLastTransaction ()
+    if err2 != nil { log.Fatal ( err2 ) }
+    return err
+  }
+  new_dir_path,err:= self.dirs.GetEntryFolder ( plat.GetShortName (), name )
+  if err != nil {
+    err2:= self.db.RollbackLastTransaction ()
+    if err2 != nil { log.Fatal ( err2 ) }
+    return err
+  }
+  if err:= os.Remove ( new_dir_path ); err != nil {
+    err2:= self.db.RollbackLastTransaction ()
+    if err2 != nil { log.Fatal ( err2 ) }
+    return err
+  }
+  if err:= os.Rename ( dir_path, new_dir_path ); err != nil {
+    err2:= self.db.RollbackLastTransaction ()
+    if err2 != nil { log.Fatal ( err2 ) }
+    return err
+  }
+
+  // Finalitza la transacció.
+  err= self.db.CommitLastTransaction ()
+  if err != nil { log.Fatal ( err ) }
+
+  return nil
+  
+} // end UpdateEntryName
+
+
+
+// ENTRY //////////////////////////////////////////////////////////////////////
+
 type Entry struct {
 
   // Part bàsica
@@ -234,3 +281,24 @@ func (self *Entry) GetLabelIDs() []int {
   fmt.Println ( "TODO Entry.GetLabelIDs !" )
   return nil
 }
+
+
+func (self *Entry) UpdateName( name string ) error {
+
+  // Processa nom
+  name= strings.TrimSpace ( name )
+  if len(name) == 0 {
+    return errors.New ( "No s'ha especificat un nom" )
+  }
+  
+  // Actualitza nom
+  if err:= self.entries.UpdateEntryName ( self.id, name ); err != nil {
+    return err
+  }
+  
+  // Modifica l'atribut
+  self.name= name
+  
+  return nil
+  
+} // end UpdateName

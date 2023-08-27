@@ -68,6 +68,9 @@ type Entry interface {
 
   // Torna els identificadors de les etiquetes que té aquesta entrada.
   GetLabelIDs() []int
+
+  // Actualitza el nom de l'entrada.
+  UpdateName(name string) error
   
 }
 

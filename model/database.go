@@ -349,3 +349,32 @@ func (self *Database) RegisterEntryWithoutCommit(
   return nil
   
 } // end RegisterEntryWithoutCommit
+
+
+func (self *Database) UpdateEntryNameWithoutCommit(
+
+  id          int64,
+  name        string,
+  
+) error {
+
+  // Prepara
+  tx,err:= self.conn.Begin ()
+  if err != nil { log.Fatal ( err ) }
+  stmt,err:= tx.Prepare ( `
+UPDATE ENTRIES SET name = ?
+       WHERE id = ?;
+` )
+  if err != nil { log.Fatal ( err ) }
+  defer stmt.Close ()
+  
+  // Inserta
+  _,err= stmt.Exec ( name, id )
+  if err != nil { tx.Rollback (); return err }
+  
+  // Registra transacció
+  self.last_tx= tx
+  
+  return nil
+  
+} // end UpdateEntryNameWithoutCommit

@@ -172,7 +172,7 @@ func (self *DetailsViewer) ViewEntry ( e_id int64, list *List ) {
   toolbar:= widget.NewToolbar (
     widget.NewToolbarSpacer (),
     widget.NewToolbarAction ( theme.DocumentCreateIcon (), func() {
-      fmt.Println ( "EDIT BUTTON!!!!" )
+      RunEditEntryWin ( e, self.model, list, self, self.win )
     }),
     widget.NewToolbarAction ( theme.DeleteIcon (), func() {
       dialog.ShowConfirm ( "Esborra entrada",
