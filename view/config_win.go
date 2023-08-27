@@ -56,7 +56,11 @@ func RunConfigWin (
     "Plataformes",
     container.NewPadded ( NewPlatformsManager ( model, list, dv, main_win ) ),
   )
-  tabs:= container.NewAppTabs ( plats_tab )
+  labels_tab:= container.NewTabItem (
+    "Etiquetes",
+    container.NewPadded ( NewLabelsManager ( model, dv, main_win ) ),
+  )
+  tabs:= container.NewAppTabs ( plats_tab, labels_tab )
   
   // --> Botonera
   but_close:= widget.NewButtonWithIcon ( "Tanca", theme.CancelIcon (), func(){

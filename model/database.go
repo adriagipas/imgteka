@@ -64,6 +64,16 @@ CREATE TABLE IF NOT EXISTS ENTRIES (
 );
 `
 
+const _CREATE_LABELS= `
+CREATE TABLE IF NOT EXISTS LABELS (
+       id INTEGER PRIMARY KEY,
+       name TEXT NOT NULL UNIQUE,
+       color_r INTEGER NOT NULL,
+       color_g INTEGER NOT NULL,
+       color_b INTEGER NOT NULL
+);
+`
+
 
 func initDatabase ( dirs *Dirs ) (*sql.DB,error) {
 
@@ -74,12 +84,15 @@ func initDatabase ( dirs *Dirs ) (*sql.DB,error) {
   // Connecta
   db,err:= sql.Open ( "sqlite3", db_fn )
   if err != nil { return nil,err }
-
+  
   // Crea taules si cal
   if _,err:= db.Exec ( _CREATE_PLATFORMS ); err != nil {
     return nil,err
   }
   if _,err:= db.Exec ( _CREATE_ENTRIES ); err != nil {
+    return nil,err
+  }
+  if _,err:= db.Exec ( _CREATE_LABELS ); err != nil {
     return nil,err
   }
   

@@ -106,6 +106,21 @@ type Platform interface {
   
 }
 
+
+type Label interface {
+
+  // Torna el nom
+  GetName() string
+
+  // Torna el color de l'etiqueta
+  GetColor() color.Color
+
+  // Torna el nombre d'entrades
+  GetNumEntries() int64
+  
+}
+
+
 type DataModel interface {
 
   // Torna la llista dels identificadors (long) de tots els objectes del
@@ -124,9 +139,12 @@ type DataModel interface {
   // Torna el fitxer indicat
   GetFile(id int64) File
 
-  // Torna la informació d'una etiqueta. Nom i color.
-  GetLabelInfo(id int) (name string,c color.Color)
-
+  // Torna els identificadors de les etiquetes
+  GetLabelIDs() []int
+  
+  // Torna l'etiqueta
+  GetLabel(id int) Label
+  
   // Obté estadístiques
   GetStats() Stats
 

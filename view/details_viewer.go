@@ -47,7 +47,8 @@ const _DETAILS_VIEWER_ENTRY = 2
 
 func (self *DetailsViewer) newLabel ( id int ) fyne.CanvasObject {
 
-  name,mcolor:= self.model.GetLabelInfo ( id )
+  label:= self.model.GetLabel ( id )
+  name,mcolor:= label.GetName (),label.GetColor ()
 
   gray:= color.RGBA{50,50,50,255}
   rect:= canvas.NewRectangle ( mcolor )

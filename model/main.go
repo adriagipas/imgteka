@@ -96,9 +96,15 @@ func (self *Model) GetFile( id int64 ) view.File {
 } // end GetFile
 
 
-func (self *Model) GetLabelInfo( id int ) (name string,mcolor color.Color) {
-  fmt.Println ( "TODO GetLabelInfo !" )
-  return "TODO!",color.Black
+func (self *Model) GetLabelIDs() []int {
+  fmt.Println ( "TODO GetLabelIDs !" )
+  return nil
+} // end GetLabelIDs
+
+
+func (self *Model) GetLabel( id int ) view.Label {
+  fmt.Println ( "TODO GetLabel !" )
+  return &_Label{}
 } // end GetLabelInfo
 
 
@@ -136,3 +142,7 @@ type _File struct{}
 func (self *_File) GetName() string {return "Fake file"}
 func (self *_File) GetType() string {return "Fake type"}
 func (self *_File) GetMetadata() []view.StringPair {return make([]view.StringPair,0)}
+type _Label struct{}
+func (self *_Label) GetName() string {return "Fake label"}
+func (self *_Label) GetColor() color.Color {return color.Black}
+func (self *_Label) GetNumEntries() int64 {return 0}
