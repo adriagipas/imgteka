@@ -74,6 +74,22 @@ CREATE TABLE IF NOT EXISTS LABELS (
 );
 `
 
+const _CREATE_ENTRY_LABEL_PAIRS= `
+CREATE TABLE IF NOT EXISTS ENTRY_LABEL_PAIRS (
+       entry_id INTEGER NOT NULL,
+       label_id INTEGER NOT NULL,
+       UNIQUE (entry_id,label_id),
+       FOREIGN KEY (entry_id)
+               REFERENCES ENTRIES (id)
+               ON DELETE CASCADE
+               ON UPDATE NO ACTION,
+       FOREIGN KEY (label_id)
+               REFERENCES LABELS (id)
+               ON DELETE CASCADE
+               ON UPDATE NO ACTION
+);
+`
+
 
 func initDatabase ( dirs *Dirs ) (*sql.DB,error) {
 
@@ -93,6 +109,9 @@ func initDatabase ( dirs *Dirs ) (*sql.DB,error) {
     return nil,err
   }
   if _,err:= db.Exec ( _CREATE_LABELS ); err != nil {
+    return nil,err
+  }
+  if _,err:= db.Exec ( _CREATE_ENTRY_LABEL_PAIRS ); err != nil {
     return nil,err
   }
   
@@ -465,3 +484,76 @@ UPDATE ENTRIES SET name = ?
   return nil
   
 } // end UpdateEntryNameWithoutCommit
+
+
+// ENTRY_LABEL_PAIRS ///////////////////////////////////////////////////////////
+
+func (self *Database) DeleteEntryLabelPair( id int64, label_id int ) error {
+
+  _,err:= self.conn.Exec ( `
+DELETE FROM ENTRY_LABEL_PAIRS
+       WHERE entry_id = ? AND label_id = ?;
+`, id, label_id )
+  
+  return err
+  
+} // end DeleteEntryLabelPair
+
+
+func (self *Database) GetLabelNumEntries( id int ) (int64,error) {
+
+  // Consulta base de dades
+  rows,err:= self.conn.Query ( `
+SELECT COUNT(CASE WHEN label_id = ? THEN rowid END)
+FROM ENTRY_LABEL_PAIRS;
+`, id )
+  if err != nil { return -1,err }
+  defer rows.Close ()
+
+  // Recorre consulta
+  if !rows.Next () {
+    return -1,errors.New ( "Error inesperat en Database.GetLabelNumEntries" )
+  }
+  var ret int64
+  err= rows.Scan ( &ret )
+  if err != nil { return -1,err }
+  
+  return ret,rows.Err ()
+  
+} // end GetLabelNumEntries
+
+
+func (self *Database) LoadLabelsEntry( id int64, e *Entry ) error {
+
+  // Consulta base de dades
+  rows,err:= self.conn.Query ( `
+SELECT label_id
+FROM ENTRY_LABEL_PAIRS
+WHERE entry_id = ?;
+`, id )
+  if err != nil { return err }
+  defer rows.Close ()
+
+  // Recorre consulta
+  for rows.Next () {
+    var label_id int
+    err= rows.Scan ( &label_id )
+    if err != nil { return err }
+    e.addLabelID ( label_id )
+  }
+  
+  return rows.Err ()
+  
+} // end LoadLabelsEntry
+
+
+func (self *Database) RegisterEntryLabelPair( id int64, label_id int ) error {
+  
+  _,err:= self.conn.Exec ( `
+   INSERT INTO ENTRY_LABEL_PAIRS(entry_id, label_id)
+          VALUES(?,?);
+`, id, label_id )
+  
+  return err
+  
+} // end RegisterEntryLabelPair

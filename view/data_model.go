@@ -69,6 +69,16 @@ type Entry interface {
   // Torna els identificadors de les etiquetes que té aquesta entrada.
   GetLabelIDs() []int
 
+  // Torna els identificadors de les etiquetes no emprades per aquesta
+  // entrada.
+  GetUnusedLabelIDs() []int
+
+  // Afegeix una nova etiqueta
+  AddLabel(id int) error
+
+  // Elimina una etiqueta de l'entrada
+  RemoveLabel(id int) error
+  
   // Actualitza el nom de l'entrada.
   UpdateName(name string) error
   

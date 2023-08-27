@@ -53,11 +53,15 @@ func RunEditEntryWin (
 
   // Contingut
   // --> Pestanyes
-  edit_tab:= container.NewTabItem (
+  name_tab:= container.NewTabItem (
     "Nom",
     container.NewPadded ( NewEditEntryName ( e, list, dv, main_win ) ),
   )
-  tabs:= container.NewAppTabs ( edit_tab )
+  labels_tab:= container.NewTabItem (
+    "Etiquetes",
+    container.NewPadded ( NewEditEntryLabels ( e, model, dv, main_win ) ),
+  )
+  tabs:= container.NewAppTabs ( name_tab, labels_tab )
   
   // --> Botonera
   but_close:= widget.NewButtonWithIcon ( "Tanca", theme.CancelIcon (), func(){

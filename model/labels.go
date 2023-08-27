@@ -127,6 +127,16 @@ func (self *Labels) Add( name string, c color.Color ) error {
 } // end Add
 
 
+func (self *Labels) GetNumEntriesLabel( id int ) int64 {
+
+  ret,err:= self.db.GetLabelNumEntries ( id )
+  if err != nil { log.Fatal ( err ) }
+
+  return ret
+  
+} // end GetNumEntriesLabel
+
+
 func (self *Labels) Remove( id int ) error {
 
   // Comprova que és una plataforma que no s'utilitza
@@ -183,8 +193,7 @@ func (self *Label) GetColor() color.Color { return self.color }
 
 
 func (self *Label) GetNumEntries() int64 {
-  fmt.Println ( "TODO Label.GetNumEntries !" )
-  return 0
+  return self.labels.GetNumEntriesLabel ( self.id )
 } // end GetNumEntries
 
 

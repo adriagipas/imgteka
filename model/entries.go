@@ -49,13 +49,17 @@ func (self *Entries) add(
 ) {
 
   self.ids= append ( self.ids, id )
-  self.v[id]= &Entry{
+  e:= &Entry{
     entries  : self,
     id       : id,
     name     : name,
     platform : platform_id,
     cover    : cover_id,
   }
+  e.labels.loaded= false
+  e.labels.ids= nil
+  e.labels.uids= nil
+  self.v[id]= e
   
 } // end add
 
@@ -74,6 +78,33 @@ func (self *Entries) reset() {
 } // end reset
 
 
+// ENTRY ///////////////////////////////////////////////////////////////////////
+
+func (self *Entry) addLabelID( id int ) {
+
+  self.labels.ids= append ( self.labels.ids, id )
+  self.labels.ids_map[id]= true
+  
+} // end addLabelID
+
+
+func (self *Entry) resetLabels() {
+
+  // Prepara
+  self.labels.ids= self.labels.ids[:0]
+  self.labels.ids_map= make(map[int]bool)
+
+  // Carrega valors
+  if err:= self.entries.LoadLabels ( self.id ); err != nil {
+    log.Fatal ( err )
+  }
+  
+  // Marca com carregat
+  self.labels.loaded= true
+  
+} // end resetLabels
+
+
 
 
 /****************/
@@ -81,22 +112,31 @@ func (self *Entries) reset() {
 /****************/
 
 type Entries struct {
-  db    *Database
-  plats *Platforms
-  dirs  *Dirs
-  ids   []int64
-  v     map[int64]*Entry
+  db     *Database
+  plats  *Platforms
+  labels *Labels
+  dirs   *Dirs
+  ids    []int64
+  v      map[int64]*Entry
 }
 
 
-func NewEntries ( db *Database, plats *Platforms, dirs *Dirs ) *Entries {
+func NewEntries (
+
+  db     *Database,
+  plats  *Platforms,
+  labels *Labels,
+  dirs   *Dirs,
+  
+) *Entries {
 
   ret:= Entries{
-    db    : db,
-    dirs  : dirs,
-    plats : plats,
-    ids   : nil,
-    v     : nil,
+    db     : db,
+    dirs   : dirs,
+    plats  : plats,
+    labels : labels,
+    ids    : nil,
+    v      : nil,
   }
   ret.reset ()
 
@@ -143,6 +183,17 @@ func (self *Entries) Add( name string, platform_id int ) error {
 } // end Add
 
 
+func (self *Entries) AddLabelEntry( id int64, label_id int ) error {
+
+  if err:= self.db.RegisterEntryLabelPair ( id, label_id ); err != nil {
+    return err
+  }
+  
+  return nil
+  
+} // end AddLabelEntry
+
+
 func (self *Entries) Get( id int64 ) *Entry {
   return self.v[id]
 } // end Get
@@ -153,11 +204,34 @@ func (self *Entries) GetIDs() []int64 {
 } // end GetIDs
 
 
+func (self *Entries) GetLabelIDs() []int {
+  return self.labels.GetIDs ()
+} // end GetLabelIDs
+
+
+func (self *Entries) LoadLabels( id int64 ) error {
+
+  // Comprova que existeix (no deuria passar que no)
+  e,ok:= self.v[id]
+  if !ok {
+    return fmt.Errorf ( "La entrada indicada (%d) no existeix", id )
+  }
+
+  // Carrega
+  if err:= self.db.LoadLabelsEntry ( id, e ); err != nil {
+    return err
+  }
+
+  return nil
+  
+} // end LoadLabels
+
+
 func (self *Entries) Remove( id int64 ) error {
 
   // Comprova que no té fitxers.
-  e:= self.v[id]
-  if e == nil {
+  e,ok:= self.v[id]
+  if !ok {
     return fmt.Errorf ( "La entrada indicada (%d) no existeix", id )
   }
   if len(e.GetFileIDs ()) > 0 {
@@ -193,6 +267,17 @@ func (self *Entries) Remove( id int64 ) error {
   return nil
   
 } // end Remove
+
+
+func (self *Entries) RemoveLabelEntry( id int64, label_id int ) error {
+
+  if err:= self.db.DeleteEntryLabelPair ( id, label_id ); err != nil {
+    return err
+  }
+  
+  return nil
+  
+} // end RemoveLabelEntry
 
 
 func (self *Entries) UpdateEntryName( id int64, name string ) error {
@@ -250,8 +335,31 @@ type Entry struct {
   name     string
   platform int
   cover    int64
+
+  // Relacionat amb les etiquetes
+  labels struct {
+    loaded  bool // Indica si s'ha inicialitzat
+    ids     []int
+    ids_map map[int]bool
+    uids    []int
+  }
   
 }
+
+
+func (self *Entry) AddLabel( id int ) error {
+
+  // Afegeix
+  if err:= self.entries.AddLabelEntry( self.id, id ); err != nil {
+    return err
+  }
+  
+  // Reseteja
+  self.resetLabels ()
+  
+  return nil
+  
+} // end AddLabel
 
 
 func (self *Entry) GetName() string { return self.name }
@@ -278,9 +386,62 @@ func (self *Entry) GetCover() image.Image {
 
 
 func (self *Entry) GetLabelIDs() []int {
-  fmt.Println ( "TODO Entry.GetLabelIDs !" )
+
+  // Carrega si no s'ha carregat mai
+  if !self.labels.loaded {
+    self.resetLabels ()
+  }
+  
+  return self.labels.ids
+  
+} // end GetLabelIDs
+
+
+func (self *Entry) GetUnusedLabelIDs() []int {
+
+  // Carrega si no s'ha carregat mai
+  if !self.labels.loaded {
+    self.resetLabels ()
+  }
+
+  // Crea el vector de unused
+  self.labels.uids= self.labels.uids[:0]
+  lids:= self.entries.GetLabelIDs ()
+  for _,id:= range lids {
+    if _,ok:= self.labels.ids_map[id]; !ok {
+      self.labels.uids= append(self.labels.uids,id)
+    }
+  }
+  
+  return self.labels.uids
+  
+} // end GetUnusedLabelIDs
+
+
+func (self *Entry) RemoveLabel( id int ) error {
+
+  // Carrega si no s'ha carregat mai (No deuria passar)
+  if !self.labels.loaded {
+    self.resetLabels ()
+  }
+  
+  // Comprova que existeix
+  if _,ok:= self.labels.ids_map[id]; !ok {
+    return fmt.Errorf ( "L'etiqueta indicada (%d) no format part de l'entrada",
+      id )
+  }
+  
+  // Elimina
+  if err:= self.entries.RemoveLabelEntry( self.id, id ); err != nil {
+    return err
+  }
+  
+  // Reseteja
+  self.resetLabels ()
+  
   return nil
-}
+  
+} // end RemoveLabel
 
 
 func (self *Entry) UpdateName( name string ) error {

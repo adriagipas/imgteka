@@ -240,7 +240,7 @@ func NewLabelsManager (
   
 ) fyne.CanvasObject {
   
-  // Llista plataformes
+  // Llista etiquetes
   list:= widget.NewList (
     func() int {return -1},
     func() fyne.CanvasObject {return nil},

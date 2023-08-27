@@ -50,7 +50,7 @@ func New() (*Model,error) {
   if err != nil { return nil,err }
   plats:= NewPlatforms ( db )
   labels:= NewLabels ( db )
-  entries:= NewEntries ( db, plats, dirs )
+  entries:= NewEntries ( db, plats, labels, dirs )
   stats:= NewStats ( db )
   
   // Crea model
