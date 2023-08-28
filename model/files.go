@@ -24,11 +24,59 @@
 package model
 
 import (
+  "crypto/md5"
+  "crypto/sha1"
   "fmt"
-  "time"
+  "io"
+  "os"
 
+  "github.com/adriagipas/imgteka/model/file_type"
   "github.com/adriagipas/imgteka/view"
 )
+
+
+
+
+// UTILS ///////////////////////////////////////////////////////////////////////
+
+func calcMD5( f *os.File ) (string,error) {
+
+  // Rebobina
+  if _,err:= f.Seek ( 0, 0 ); err != nil {
+    return "",fmt.Errorf ( "No s'ha pogut calcular el MD5: %s", err )
+  }
+
+  // Calcula MD5
+  h:= md5.New ()
+  if _,err:= io.Copy ( h, f ); err != nil {
+    return "",fmt.Errorf ( "No s'ha pogut calcular el MD5: %s", err )
+  }
+
+  ret:= fmt.Sprintf ( "%x", h.Sum ( nil ) )
+
+  return ret,nil
+  
+} // end calcMD5
+
+
+func calcSHA1( f *os.File ) (string,error) {
+
+  // Rebobina
+  if _,err:= f.Seek ( 0, 0 ); err != nil {
+    return "",fmt.Errorf ( "No s'ha pogut calcular el SHA1: %s", err )
+  }
+
+  // Calcula MD5
+  h:= sha1.New ()
+  if _,err:= io.Copy ( h, f ); err != nil {
+    return "",fmt.Errorf ( "No s'ha pogut calcular el SHA1: %s", err )
+  }
+  
+  ret:= fmt.Sprintf ( "%x", h.Sum ( nil ) )
+  
+  return ret,nil
+  
+} // end calcSHA1
 
 
 
@@ -59,27 +107,42 @@ func (self *Files) Add(
   e         *Entry,
   path      string,
   name      string,
-  file_type int,
+  ftype     int,
   create_pb func() view.ProgressBar,
 
 ) error {
 
   // Crea barra de progress
   pb:= create_pb ()
+  defer pb.Close ()
 
-  pb.Set ( "Missatge 1 ...", 0.1 )
-  time.Sleep ( time.Second )
+  // Comprova existeix
+  pb.Set ( "Comprova que existeix...", 0.1 )
+  f,err:= os.Open ( path )
+  if err != nil {
+    return fmt.Errorf ( "No s'ha pogut obrir el fitxer '%s': %s", path, err )
+  }
+  defer f.Close ()
 
-  pb.Set ( "Missatge 2 ...", 0.5 )
-  time.Sleep ( time.Second )
+  // Comprova tipus i obté metadades
+  pb.Set ( "Comprova tipus i obté metadades...", 0.2 )
+  ft,err:= file_type.Get ( ftype )
+  if err != nil { return err }
+  md,err:= ft.GetMetadata ( f )
+  if err != nil { return err }
+  fmt.Println ( "Metadata", md )
+  
+  // Calcula MD5
+  pb.Set ( "Calcula MD5...", 0.3 )
+  md5,err:= calcMD5 ( f )
+  if err != nil { return err }
+  fmt.Println ( "MD5", md5 )
 
-  pb.Set ( "Missatge 3 ...", 0.8 )
-  time.Sleep ( time.Second )
-
-  pb.Set ( "Missatge 4 ...", 1 )
-  time.Sleep ( time.Second )
-
-  pb.Close ()
+  // Calcula SHA1
+  pb.Set ( "Calcula SHA1...", 0.4 )
+  sha1,err:= calcSHA1 ( f )
+  if err != nil { return err }
+  fmt.Println ( "SHA1", sha1 )
   
   return nil
   

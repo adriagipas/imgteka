@@ -23,7 +23,9 @@
 package file_type
 
 import (
+  "fmt"
   "log"
+  "os"
 )
 
 
@@ -35,6 +37,26 @@ import (
 
 // IDENTIFICADORS
 const ID_IMAGE_PNG = 0x100
+
+
+
+
+/*********/
+/* TIPUS */
+/*********/
+
+type FileType interface {
+
+  // Aquest mètode te dos propòstis:
+  //  1) Torna en un string un json amb les metadades particular
+  //     d'aquest tipus
+  //  2) Comprovar que efectivament el fitxer és del tipus indicat.
+  //
+  // NOTA! El 'fd' no té perquè estar apuntant al principi del fitxer,
+  // però es pot i es deu rebobinar.
+  GetMetadata(fd *os.File) (string,error)
+
+}
 
 
 
@@ -55,6 +77,20 @@ var _IDS []int= []int{
 /****************/
 /* PART PÚBLICA */
 /****************/
+
+func Get( id int ) (FileType,error) {
+  
+  switch id {
+    
+  case ID_IMAGE_PNG:
+    return &PNG{},nil
+    
+  default:
+    return nil,fmt.Errorf ( "Tipus de fitxer desconegut:", id )
+  }
+  
+} // end Get
+
 
 func GetIDs() []int {
   return _IDS
