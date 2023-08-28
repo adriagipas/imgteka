@@ -29,15 +29,27 @@ import (
 )
 
 
+type ProgressBar interface {
+
+  Close()
+  
+  // Fixa un missatge i una fracció de completesa [0..1].
+  Set(message string,fraction float32)
+  
+}
+
+
 type StringPair interface {
   
   GetKey() string
 
   GetValue() string
+  
 }
 
 
 type File interface {
+  
   // Torna el nom del fitxer
   GetName() string
 
@@ -72,6 +84,14 @@ type Entry interface {
   // entrada.
   GetUnusedLabelIDs() []int
 
+  // Afegeix (i crea) un nou fitxer.
+  // path -> Path fitxer
+  // name -> Nom amb el que volem registrar el fitxer
+  // file_type -> Identificador tipus fitxer
+  // create_pb -> Funció que crea i mostra una barra de progrés
+  AddFile(path string,name string,file_type int,
+    create_pb func() ProgressBar) error
+  
   // Afegeix una nova etiqueta
   AddLabel(id int) error
 

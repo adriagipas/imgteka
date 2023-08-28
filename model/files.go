@@ -25,6 +25,7 @@ package model
 
 import (
   "fmt"
+  "time"
 
   "github.com/adriagipas/imgteka/view"
 )
@@ -51,6 +52,38 @@ func NewFiles ( db *Database ) *Files {
   return &ret
   
 } // end NewFiles
+
+
+func (self *Files) Add(
+
+  e         *Entry,
+  path      string,
+  name      string,
+  file_type int,
+  create_pb func() view.ProgressBar,
+
+) error {
+
+  // Crea barra de progress
+  pb:= create_pb ()
+
+  pb.Set ( "Missatge 1 ...", 0.1 )
+  time.Sleep ( time.Second )
+
+  pb.Set ( "Missatge 2 ...", 0.5 )
+  time.Sleep ( time.Second )
+
+  pb.Set ( "Missatge 3 ...", 0.8 )
+  time.Sleep ( time.Second )
+
+  pb.Set ( "Missatge 4 ...", 1 )
+  time.Sleep ( time.Second )
+
+  pb.Close ()
+  
+  return nil
+  
+} // end Add
 
 
 func (self *Files) Get( id int64 ) *File {

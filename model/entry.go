@@ -28,6 +28,8 @@ import (
   "image"
   "log"
   "strings"
+
+  "github.com/adriagipas/imgteka/view"
 )
 
 
@@ -148,6 +150,29 @@ func NewEntry(
 } // end NewEntry
 
 
+func (self *Entry) AddFile(
+
+  path      string,
+  name      string,
+  file_type int,
+  create_pb func() view.ProgressBar,
+  
+) error {
+
+  // Afegeix
+  if err:= self.entries.AddFileEntry ( self.id, path, name,
+    file_type, create_pb ); err != nil {
+    return err
+  }
+  
+  // Reseteja.
+  self.resetFiles ()
+
+  return nil
+  
+} // end AddFile
+
+
 func (self *Entry) AddLabel( id int ) error {
 
   // Afegeix
@@ -188,6 +213,9 @@ func (self *Entry) GetFileIDs() []int64 {
   return self.files.ids
   
 } // end GetFileIDs
+
+
+func (self *Entry) GetID() int64 { return self.id }
 
 
 func (self *Entry) GetLabelIDs() []int {

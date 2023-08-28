@@ -52,7 +52,7 @@ func New() (*Model,error) {
   plats:= NewPlatforms ( db )
   labels:= NewLabels ( db )
   files:= NewFiles ( db )
-  entries:= NewEntries ( db, plats, labels, dirs )
+  entries:= NewEntries ( db, plats, labels, files, dirs )
   stats:= NewStats ( db )
   
   // Crea model

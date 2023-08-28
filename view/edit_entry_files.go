@@ -40,6 +40,59 @@ import (
 /* PART PRIVADA */
 /****************/
 
+type _AddFileProgressBar struct {
+  pop  *widget.PopUp
+  pb   *widget.ProgressBar
+  text *widget.Label
+}
+
+func newAddFileProgressBar( win fyne.Window ) *_AddFileProgressBar {
+
+  // Crea PopUP amb caixa buida
+  pop_box:= container.NewMax ( )
+  pop:= widget.NewModalPopUp ( pop_box, win.Canvas () )
+
+  // Missatge de text
+  text:= widget.NewLabel ( "" )
+
+  // Barra de progrés
+  pb:= widget.NewProgressBar ()
+
+  // Contingut
+  content:= container.NewVBox ( text, container.NewPadded ( pb ) )
+  pop_box.Add ( content )
+
+  // Mostra
+  csize:= win.Content ().Size ()
+  pop.Resize ( fyne.Size{csize.Width*0.4,pop.Size ().Height} )
+  pop.Show ()
+
+  // Retorna objecte
+  ret:= _AddFileProgressBar{
+    pop  : pop,
+    pb   : pb,
+    text : text,
+  }
+
+  return &ret
+  
+} // end newAddFileProgressBar
+
+
+func (self *_AddFileProgressBar) Close() {
+  self.pop.Hide ()
+} // end Close
+
+
+func (self *_AddFileProgressBar) Set( msg string, f float32 ) {
+
+  self.pb.SetValue ( float64(f) )
+  self.text.SetText ( msg )
+  self.pop.Refresh ()
+  
+} // end Set
+
+
 func showAddFileEntry(
   
   e        Entry,
@@ -59,8 +112,7 @@ func showAddFileEntry(
       
       // Obté nom i path
       uri:= r.URI ()
-      //path:= uri.Path ()
-
+      
       // Nom
       name:= widget.NewEntry ()
       name.Text= uri.Name ()
@@ -87,16 +139,16 @@ func showAddFileEntry(
       d2:= dialog.NewForm ( "Afegeix fitxer", "Afegeix", "Cancel·la", items,
         func(b bool){
           if !b { return }
-          fmt.Println ( "AFEGIR !!!", uri.Path (), name.Text, type_text2id[type_sel.Selected] )
-          /*
-          if err:= e.AddLabel ( lbl_text2id[lbl_sel.Selected] ); err != nil {
+          if err:= e.AddFile ( uri.Path (), name.Text,
+            type_text2id[type_sel.Selected], func() ProgressBar{
+              return newAddFileProgressBar ( main_win )
+          }); err != nil {
             dialog.ShowError ( err, main_win )
           } else {
             list.Refresh ()
             list_win.Refresh ()
             dv.Update ()
           }
-          */
         }, main_win )
       win_size:= main_win.Content ().Size ()
       d2.Resize ( fyne.Size{win_size.Width*0.4,win_size.Height*0.4} )

@@ -29,6 +29,8 @@ import (
   "log"
   "os"
   "strings"
+
+  "github.com/adriagipas/imgteka/view"
 )
 
 
@@ -77,6 +79,7 @@ type Entries struct {
   db     *Database
   plats  *Platforms
   labels *Labels
+  files  *Files
   dirs   *Dirs
   ids    []int64
   v      map[int64]*Entry
@@ -88,6 +91,7 @@ func NewEntries (
   db     *Database,
   plats  *Platforms,
   labels *Labels,
+  files  *Files,
   dirs   *Dirs,
   
 ) *Entries {
@@ -97,6 +101,7 @@ func NewEntries (
     dirs   : dirs,
     plats  : plats,
     labels : labels,
+    files  : files,
     ids    : nil,
     v      : nil,
   }
@@ -143,6 +148,32 @@ func (self *Entries) Add( name string, platform_id int ) error {
   return nil
   
 } // end Add
+
+
+func (self *Entries) AddFileEntry(
+
+  id        int64,
+  path      string,
+  name      string,
+  file_type int,
+  create_pb func() view.ProgressBar,
+  
+) error {
+  
+  // Obtindre entrada
+  e,ok:= self.v[id]
+  if !ok { // No deuria passar
+    return fmt.Errorf ( "La entrada indicada (%d) no existeix", id )
+  }
+
+  // Afegeix
+  if err:= self.files.Add ( e, path, name, file_type, create_pb ); err != nil {
+    return err
+  }
+  
+  return nil
+  
+} // end AddFileEntry
 
 
 func (self *Entries) AddLabelEntry( id int64, label_id int ) error {
