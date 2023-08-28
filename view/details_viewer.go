@@ -223,7 +223,7 @@ func (self *DetailsViewer) ViewFile ( f_id int64 ) {
   // Crea card
   card:= widget.NewCard (
     f.GetName (),
-    f.GetType (),
+    self.model.GetFileTypeName ( f.GetTypeID () ),
     text,
   )
 

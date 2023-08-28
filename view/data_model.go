@@ -41,9 +41,8 @@ type File interface {
   // Torna el nom del fitxer
   GetName() string
 
-  // Torna una cadena curta que descriu el tipus de fitxar. Per
-  // exemple Diquet 3 1/2
-  GetType() string
+  // Torna l'identificador del tipus
+  GetTypeID() int
 
   // Torna metadades associades a aquest fitxer
   GetMetadata() []StringPair
@@ -161,6 +160,12 @@ type DataModel interface {
   // Obté estadístiques
   GetStats() Stats
 
+  // Obté els identificadors dels tipus de fitxer
+  GetFileTypeIDs() []int
+
+  // Obté el nom d'un tipus
+  GetFileTypeName(id int) string
+  
   // Afegeix una nova plataforma
   AddPlatform(short_name string,name string,c color.Color) error
 

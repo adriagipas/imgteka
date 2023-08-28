@@ -187,7 +187,8 @@ func (self *_Factory) setFileView (o fyne.CanvasObject, f File) {
   cont:= o.(*fyne.Container)
 
   // Descripció
-  text:= fmt.Sprintf ( FILE_VIEW_TEMPLATE, f.GetName (), f.GetType () )
+  text:= fmt.Sprintf ( FILE_VIEW_TEMPLATE, f.GetName (),
+    self.model.GetFileTypeName ( f.GetTypeID () ) )
   cont.Objects[0]= widget.NewRichTextFromMarkdown ( text )
   
 } // end setFileView

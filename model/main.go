@@ -114,6 +114,18 @@ func (self *Model) GetStats() view.Stats {
 } // end GetStates
 
 
+func (self *Model) GetFileTypeIDs() []int {
+  fmt.Println ( "TODO GetFileTypeIDs !" )
+  return []int{0}[:]
+} // end GetFileTypeIDs
+
+
+func (self *Model) GetFileTypeName(id int) string {
+  fmt.Println ( "TODO GetFileTypeName !" )
+  return "Fake Type"
+} // end GetFileTypeName
+
+
 func (self *Model) AddPlatform(
   short_name string,
   name       string,
@@ -151,6 +163,6 @@ func (self *Model) RemoveEntry( id int64 ) error {
 /// TODO!!!!!!!!!!!!!!!!!!!!! /////////////////////////////////////////////////
 type _File struct{}
 func (self *_File) GetName() string {return "Fake file"}
-func (self *_File) GetType() string {return "Fake type"}
+func (self *_File) GetTypeID() int {return 0}
 func (self *_File) GetMetadata() []view.StringPair {return make([]view.StringPair,0)}
 
