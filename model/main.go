@@ -23,9 +23,9 @@
 package model
 
 import (
-  "fmt"
   "image/color"
 
+  "github.com/adriagipas/imgteka/model/file_type"
   "github.com/adriagipas/imgteka/view"
 )
 
@@ -37,6 +37,7 @@ type Model struct {
   db      *Database
   plats   *Platforms
   labels  *Labels
+  files   *Files
   entries *Entries
   stats   *Stats
 }
@@ -50,6 +51,7 @@ func New() (*Model,error) {
   if err != nil { return nil,err }
   plats:= NewPlatforms ( db )
   labels:= NewLabels ( db )
+  files:= NewFiles ( db )
   entries:= NewEntries ( db, plats, labels, dirs )
   stats:= NewStats ( db )
   
@@ -59,6 +61,7 @@ func New() (*Model,error) {
     db      : db,
     plats   : plats,
     labels  : labels,
+    files   : files,
     entries : entries,
     stats   : stats,
   }
@@ -94,8 +97,7 @@ func (self *Model) GetPlatform( id int ) view.Platform {
 
 
 func (self *Model) GetFile( id int64 ) view.File {
-  fmt.Println ( "TODO GetFile !" )
-  return &_File{}
+  return self.files.Get ( id )
 } // end GetFile
 
 
@@ -115,14 +117,12 @@ func (self *Model) GetStats() view.Stats {
 
 
 func (self *Model) GetFileTypeIDs() []int {
-  fmt.Println ( "TODO GetFileTypeIDs !" )
-  return []int{0}[:]
+  return file_type.GetIDs ()
 } // end GetFileTypeIDs
 
 
 func (self *Model) GetFileTypeName(id int) string {
-  fmt.Println ( "TODO GetFileTypeName !" )
-  return "Fake Type"
+  return file_type.GetName ( id )
 } // end GetFileTypeName
 
 
@@ -158,11 +158,3 @@ func (self *Model) RemoveLabel( id int ) error {
 func (self *Model) RemoveEntry( id int64 ) error {
   return self.entries.Remove ( id )
 } // end RemoveEntry
-
-
-/// TODO!!!!!!!!!!!!!!!!!!!!! /////////////////////////////////////////////////
-type _File struct{}
-func (self *_File) GetName() string {return "Fake file"}
-func (self *_File) GetTypeID() int {return 0}
-func (self *_File) GetMetadata() []view.StringPair {return make([]view.StringPair,0)}
-

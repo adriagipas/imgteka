@@ -91,6 +91,27 @@ CREATE TABLE IF NOT EXISTS ENTRY_LABEL_PAIRS (
 `
 
 
+const _CREATE_FILES= `
+CREATE TABLE IF NOT EXISTS FILES (
+       id INTEGER PRIMARY KEY,
+       name TEXT NOT NULL,
+       entry_id INTEGER NOT NULL,
+       type INTEGER NOT NULL,
+       size INTEGER NOT NULL,
+       md5 TEXT NOT NULL,
+       sha1 TEXT NOT NULL,
+       extra_json TEXT NOT NULL,
+       last_check INTEGER NOT NULL,
+       UNIQUE (entry_id,name),
+       UNIQUE (type,name),
+       FOREIGN KEY (entry_id)
+               REFERENCES ENTRIES (id)
+               ON DELETE CASCADE
+               ON UPDATE NO ACTION
+);
+`
+
+
 func initDatabase ( dirs *Dirs ) (*sql.DB,error) {
 
   // Nom
@@ -112,6 +133,9 @@ func initDatabase ( dirs *Dirs ) (*sql.DB,error) {
     return nil,err
   }
   if _,err:= db.Exec ( _CREATE_ENTRY_LABEL_PAIRS ); err != nil {
+    return nil,err
+  }
+  if _,err:= db.Exec ( _CREATE_FILES ); err != nil {
     return nil,err
   }
   
@@ -557,3 +581,63 @@ func (self *Database) RegisterEntryLabelPair( id int64, label_id int ) error {
   return err
   
 } // end RegisterEntryLabelPair
+
+
+// FILES ///////////////////////////////////////////////////////////////////////
+
+// S'enten que ja està, no deuria fallar
+func (self *Database) GetFile( id int64 ) (
+  name       string,
+  entry_id   int64,
+  file_type  int,
+  size       int64,
+  md5        string,
+  sha1       string,
+  json       string,
+  last_check int64,
+) {
+  
+  // Consulta base de dades
+  rows,err:= self.conn.Query ( `
+SELECT name,entry_id,type,size,md5,sha1,extra_json,last_check
+FROM LABELS
+WHERE id = ?;
+`, id )
+  if err != nil { log.Fatal ( err ) }
+  defer rows.Close ()
+
+  // Recorre consulta
+  if !rows.Next () {
+    log.Fatal ( "Error inesperat en Database.GetFile" )
+  }
+  err= rows.Scan ( &name, &entry_id, &file_type, &size, &md5,
+    &sha1, &json, &last_check )
+  if err != nil { log.Fatal ( err ) }
+  
+  return
+  
+} // end GetFile
+
+
+func (self *Database) LoadFilesEntry( id int64, e *Entry ) error {
+
+  // Consulta base de dades
+  rows,err:= self.conn.Query ( `
+SELECT id
+FROM FILES
+WHERE entry_id = ?;
+`, id )
+  if err != nil { return err }
+  defer rows.Close ()
+
+  // Recorre consulta
+  for rows.Next () {
+    var file_id int64
+    err= rows.Scan ( &file_id )
+    if err != nil { return err }
+    e.addFileID ( file_id )
+  }
+  
+  return rows.Err ()
+  
+} // end LoadFilesEntry

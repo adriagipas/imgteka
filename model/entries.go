@@ -48,17 +48,7 @@ func (self *Entries) add(
 ) {
 
   self.ids= append ( self.ids, id )
-  e:= &Entry{
-    entries  : self,
-    id       : id,
-    name     : name,
-    platform : platform_id,
-    cover    : cover_id,
-  }
-  e.labels.loaded= false
-  e.labels.ids= nil
-  e.labels.uids= nil
-  self.v[id]= e
+  self.v[id]= NewEntry ( self, id, name, platform_id, cover_id )
   
 } // end add
 
@@ -179,6 +169,24 @@ func (self *Entries) GetIDs() []int64 {
 func (self *Entries) GetLabelIDs() []int {
   return self.labels.GetIDs ()
 } // end GetLabelIDs
+
+
+func (self *Entries) LoadFiles( id int64 ) error {
+
+  // Comprova que existeix (no deuria passar que no)
+  e,ok:= self.v[id]
+  if !ok {
+    return fmt.Errorf ( "La entrada indicada (%d) no existeix", id )
+  }
+
+  // Carrega
+  if err:= self.db.LoadFilesEntry ( id, e ); err != nil {
+    return err
+  }
+  
+  return nil
+  
+} // end LoadFiles
 
 
 func (self *Entries) LoadLabels( id int64 ) error {

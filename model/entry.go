@@ -37,12 +37,33 @@ import (
 /* PART PRIVADA */
 /****************/
 
+func (self *Entry) addFileID( id int64 ) {
+  self.files.ids= append ( self.files.ids, id )
+} // end addFileID
+
+
 func (self *Entry) addLabelID( id int ) {
 
   self.labels.ids= append ( self.labels.ids, id )
   self.labels.ids_map[id]= true
   
 } // end addLabelID
+
+
+func (self *Entry) resetFiles() {
+
+  // Prepara
+  self.files.ids= self.files.ids[:0]
+  
+  // Carrega valors
+  if err:= self.entries.LoadFiles ( self.id ); err != nil {
+    log.Fatal ( err )
+  }
+  
+  // Marca com carregat
+  self.files.loaded= true
+  
+} // end resetFiles
 
 
 func (self *Entry) resetLabels() {
@@ -84,8 +105,47 @@ type Entry struct {
     ids_map map[int]bool
     uids    []int
   }
+
+  // Relacionat amb els fitxers
+  files struct {
+    loaded bool // Indica si s'ha inicialitzat
+    ids    []int64
+  }
   
 }
+
+
+func NewEntry(
+
+  entries     *Entries,
+  id          int64,
+  name        string,
+  platform_id int,
+  cover_id    int64,
+  
+) *Entry {
+
+  // Bàsic
+  ret:= &Entry{
+    entries  : entries,
+    id       : id,
+    name     : name,
+    platform : platform_id,
+    cover    : cover_id,
+  }
+
+  // Relacionat amb etiquetes
+  ret.labels.loaded= false
+  ret.labels.ids= nil
+  ret.labels.uids= nil
+
+  // Relacionat amb els fitxers
+  ret.files.loaded= false
+  ret.files.ids= nil
+  
+  return ret
+  
+} // end NewEntry
 
 
 func (self *Entry) AddLabel( id int ) error {
@@ -103,14 +163,6 @@ func (self *Entry) AddLabel( id int ) error {
 } // end AddLabel
 
 
-func (self *Entry) GetName() string { return self.name }
-func (self *Entry) GetPlatformID() int { return self.platform }
-func (self *Entry) GetFileIDs() []int64 {
-  fmt.Println ( "TODO Entry.GetFileIDs !" )
-  return nil
-}
-
-
 func (self *Entry) GetCover() image.Image {
 
   var ret image.Image
@@ -126,6 +178,18 @@ func (self *Entry) GetCover() image.Image {
 } // end GetCover
 
 
+func (self *Entry) GetFileIDs() []int64 {
+
+  // Carrega si no s'ha carregat mai
+  if !self.files.loaded {
+    self.resetFiles ()
+  }
+  
+  return self.files.ids
+  
+} // end GetFileIDs
+
+
 func (self *Entry) GetLabelIDs() []int {
 
   // Carrega si no s'ha carregat mai
@@ -136,6 +200,10 @@ func (self *Entry) GetLabelIDs() []int {
   return self.labels.ids
   
 } // end GetLabelIDs
+
+
+func (self *Entry) GetName() string { return self.name }
+func (self *Entry) GetPlatformID() int { return self.platform }
 
 
 func (self *Entry) GetUnusedLabelIDs() []int {
