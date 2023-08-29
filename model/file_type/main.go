@@ -38,9 +38,10 @@ import (
 /*************/
 
 // IDENTIFICADORS
-const ID_IMAGE_PNG = 0x100
+const ID_IMAGE_PNG  = 0x100
+const ID_IMAGE_JPEG = 0x101
 
-const ID_ROM_GG    = 0x200
+const ID_ROM_GG     = 0x200
 
 
 
@@ -94,6 +95,7 @@ func (self *KeyValue) GetValue() string { return self.value }
 var _IDS []int= []int{
   
   ID_IMAGE_PNG,
+  ID_IMAGE_JPEG,
 
   ID_ROM_GG,
   
@@ -101,6 +103,7 @@ var _IDS []int= []int{
 
 // Tipus globals
 var _vPNG PNG= PNG{}
+var _vJPEG JPEG= JPEG{}
 var _vGG GG= GG{}
 
 
@@ -116,7 +119,9 @@ func Get( id int ) (FileType,error) {
     
   case ID_IMAGE_PNG:
     return &_vPNG,nil
-
+  case ID_IMAGE_JPEG:
+    return &_vJPEG,nil
+    
   case ID_ROM_GG:
     return &_vGG,nil
     

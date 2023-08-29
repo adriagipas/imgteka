@@ -165,7 +165,7 @@ func (self *DetailsViewer) ViewEntry ( e_id int64, list *List ) {
   if cover != nil {
     img:= canvas.NewImageFromImage ( cover )
     img.FillMode= canvas.ImageFillContain
-    img.SetMinSize ( fyne.Size{1,1} )
+    //img.SetMinSize ( fyne.Size{1,1} )
     card.SetImage ( img )
   }
   
@@ -232,7 +232,7 @@ func (self *DetailsViewer) ViewFile ( f_id int64 ) {
   if img != nil {
     img_w:= canvas.NewImageFromImage ( img )
     img_w.FillMode= canvas.ImageFillContain
-    img_w.SetMinSize ( fyne.Size{1,1} )
+    //img_w.SetMinSize ( fyne.Size{1,1} )
     card.SetImage ( img_w )
   }
   
