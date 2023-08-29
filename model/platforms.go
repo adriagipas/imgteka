@@ -46,12 +46,6 @@ func (self *Platforms) add(
   r,g,b      uint8,
 ) {
 
-  // Reformata short_name
-  for i:= 0; i < 3-len(short_name); i++ {
-    short_name= short_name+" "
-  }
-  
-  // Afegeix
   self.ids= append ( self.ids, id )
   self.v[id]= &Platform{
     plats : self,

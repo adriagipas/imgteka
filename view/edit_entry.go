@@ -39,11 +39,12 @@ import (
 
 func RunEditEntryWin (
 
-  e        Entry,
-  model    DataModel,
-  list     *List,
-  dv       *DetailsViewer,
-  main_win fyne.Window,
+  e         Entry,
+  model     DataModel,
+  list      *List,
+  dv        *DetailsViewer,
+  statusbar *StatusBar,
+  main_win  fyne.Window,
 
 ) {
 
@@ -63,7 +64,8 @@ func RunEditEntryWin (
   )
   files_tab:= container.NewTabItem (
     "Fitxers",
-    container.NewPadded ( NewEditEntryFiles ( e, model, list, dv, main_win ) ),
+    container.NewPadded ( NewEditEntryFiles (
+      e, model, list, dv, statusbar, main_win ) ),
   )
   tabs:= container.NewAppTabs ( name_tab, labels_tab, files_tab )
   

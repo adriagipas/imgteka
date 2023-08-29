@@ -280,6 +280,31 @@ func (self *Entries) Remove( id int64 ) error {
 } // end Remove
 
 
+func (self *Entries) RemoveFileEntry( id int64, file_id int64 ) error {
+
+  // Obtindre entrada
+  e,ok:= self.v[id]
+  if !ok { // No deuria passar
+    return fmt.Errorf ( "La entrada indicada (%d) no existeix", id )
+  }
+  
+  // Comprova que forma part de l'entrada
+  f:= self.files.Get ( file_id )
+  if f.GetEntryID () != id {
+    return fmt.Errorf ( "La entrada (%id) no inclou el fitxer indicat (%d)",
+      id, file_id)
+  }
+
+  // Elimina
+  if err:= self.files.Remove ( file_id, e ); err != nil {
+    return err
+  }
+
+  return nil
+  
+} // end RemoveFileEntry
+
+
 func (self *Entries) RemoveLabelEntry( id int64, label_id int ) error {
 
   if err:= self.db.DeleteEntryLabelPair ( id, label_id ); err != nil {
@@ -333,3 +358,34 @@ func (self *Entries) UpdateEntryName( id int64, name string ) error {
   return nil
   
 } // end UpdateEntryName
+
+
+func (self *Entries) UpdateFileNameEntry(
+
+  id      int64,
+  file_id int64,
+  name    string,
+
+) error {
+
+  // Obtindre entrada
+  e,ok:= self.v[id]
+  if !ok { // No deuria passar
+    return fmt.Errorf ( "La entrada indicada (%d) no existeix", id )
+  }
+  
+  // Comprova que forma part de l'entrada
+  f:= self.files.Get ( file_id )
+  if f.GetEntryID () != id {
+    return fmt.Errorf ( "La entrada (%id) no inclou el fitxer indicat (%d)",
+      id, file_id)
+  }
+
+  // Updateja el nom
+  if err:= self.files.UpdateName ( file_id, e, name ); err != nil {
+    return err
+  }
+
+  return nil
+  
+} // end UpdateFileNameEntry

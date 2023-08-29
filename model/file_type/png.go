@@ -52,3 +52,6 @@ func (self *PNG) GetMetadata(fd *os.File) (string,error) {
   return "",nil
   
 } // end GetMetadata
+
+
+func (self *PNG) GetShortName() string { return "PNG" }

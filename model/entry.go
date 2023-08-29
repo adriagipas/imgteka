@@ -255,6 +255,26 @@ func (self *Entry) GetUnusedLabelIDs() []int {
 } // end GetUnusedLabelIDs
 
 
+func (self *Entry) RemoveFile( id int64 ) error {
+
+  // Carrega si no s'ha carregat mai (No deuria passar)
+  if !self.files.loaded {
+    self.resetFiles ()
+  }
+
+  // Elimina
+  if err:= self.entries.RemoveFileEntry ( self.id, id ); err != nil {
+    return err
+  }
+  
+  // Reseteja
+  self.resetFiles ()
+  
+  return nil
+  
+} // end RemoveFile
+
+
 func (self *Entry) RemoveLabel( id int ) error {
 
   // Carrega si no s'ha carregat mai (No deuria passar)
@@ -300,3 +320,21 @@ func (self *Entry) UpdateName( name string ) error {
   return nil
   
 } // end UpdateName
+
+
+func (self *Entry) UpdateFileName( id int64, name string ) error {
+
+  // Processa nom
+  name= strings.TrimSpace ( name )
+  if len(name) == 0 {
+    return errors.New ( "No s'ha especificat un nom" )
+  }
+
+  // Updateja
+  if err:= self.entries.UpdateFileNameEntry ( self.id, id, name ); err != nil {
+    return err
+  }
+  
+  return nil
+  
+} // end UpdateFileName

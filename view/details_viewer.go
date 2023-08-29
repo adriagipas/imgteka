@@ -173,7 +173,7 @@ func (self *DetailsViewer) ViewEntry ( e_id int64, list *List ) {
   toolbar:= widget.NewToolbar (
     widget.NewToolbarSpacer (),
     widget.NewToolbarAction ( theme.DocumentCreateIcon (), func() {
-      RunEditEntryWin ( e, self.model, list, self, self.win )
+      RunEditEntryWin ( e, self.model, list, self, self.statusbar, self.win )
     }),
     widget.NewToolbarAction ( theme.DeleteIcon (), func() {
       dialog.ShowConfirm ( "Esborra entrada",
@@ -234,9 +234,6 @@ func (self *DetailsViewer) ViewFile ( f_id int64 ) {
     widget.NewToolbarSpacer (),
     widget.NewToolbarAction ( theme.MediaPlayIcon (), func() {
       fmt.Println ( "PLAY BUTTON!!!!" )
-    }),
-    widget.NewToolbarAction ( theme.DeleteIcon (), func() {
-      fmt.Println ( "DELETE BUTTON!!!!" )
     }),
   )
   

@@ -95,11 +95,17 @@ type Entry interface {
   // Afegeix una nova etiqueta
   AddLabel(id int) error
 
+  // Elimina el fitxer de l'entrada
+  RemoveFile(id int64) error
+  
   // Elimina una etiqueta de l'entrada
   RemoveLabel(id int) error
   
   // Actualitza el nom de l'entrada.
   UpdateName(name string) error
+
+  // Actualitza el nom d'un fitxer
+  UpdateFileName(id int64,name string) error
   
 }
 
@@ -198,10 +204,10 @@ type DataModel interface {
   // Elimina una plataforma
   RemovePlatform(id int) error
 
-  // Elimina una etiqueta
-  RemoveLabel(id int) error
-  
   // Elimina una entrada
   RemoveEntry(id int64) error
+  
+  // Elimina una etiqueta
+  RemoveLabel(id int) error
   
 }

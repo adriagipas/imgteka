@@ -37,6 +37,7 @@ import (
 
 const _ROOT_NAME= "imgteka"
 const _ROOT_ENTRIES= "entries"
+const _ROOT_FILES= "files"
 
 
 
@@ -95,3 +96,52 @@ func (self *Dirs) GetEntryFolder(
   return path.Dir ( ret ),nil
   
 } // end GetEntryFolder
+
+
+func (self *Dirs) GetFileNameEntries(
+
+  platform  string,
+  entry     string,
+  name      string,
+  
+) (string,error) {
+
+  tmp:= path.Join ( _ROOT_NAME, _ROOT_ENTRIES, platform, entry, name )
+  ret,err:= xdg.DataFile ( tmp )
+  if err != nil { return "",err }
+  
+  return ret,nil
+  
+} // end GetFileNameEntries
+
+
+func (self *Dirs) GetFileNameFiles(
+
+  file_type string,
+  name      string,
+  
+) (string,error) {
+
+  tmp:= path.Join ( _ROOT_NAME, _ROOT_FILES, file_type, name )
+  ret,err:= xdg.DataFile ( tmp )
+  if err != nil { return "",err }
+
+  return ret,nil
+  
+} // end GetFileNameFiles
+
+
+func (self *Dirs) GetFileNameTemp(
+
+  file_type string,
+  name      string,
+  
+) (string,error) {
+
+  tmp:= path.Join ( _ROOT_NAME, _ROOT_FILES, file_type, name )
+  ret,err:= xdg.CacheFile ( tmp )
+  if err != nil { return "",err }
+
+  return ret,nil
+  
+} // end GetFileNameTemp

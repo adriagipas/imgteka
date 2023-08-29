@@ -23,7 +23,6 @@
 package model
 
 import (
-  "fmt"
   "log"
 )
 
@@ -55,6 +54,10 @@ func (self *Stats) GetNumEntries() int64 {
 
 
 func (self *Stats) GetNumFiles() int64 {
-  fmt.Println ( "TODO Stats.GetNumFiles !" )
-  return 0
+  
+  ret,err:= self.db.GetNumFiles ()
+  if err != nil { log.Fatal ( err ) }
+  
+  return ret
+  
 } // end GetNumFiles

@@ -40,6 +40,46 @@ import (
 /* PART PRIVADA */
 /****************/
 
+func showEditFile(
+
+  e        Entry,
+  f        File,
+  file_id  int64,
+  main_win fyne.Window,
+  list_win *List,
+  list     *widget.List,
+  
+) {
+
+  // Nom
+  name:= widget.NewEntry ()
+  name.Text= f.GetName ()
+  name.Validator= validation.NewRegexp ( `^.+$`,
+    "el nom ha de contindre almenys un caràcter" )
+
+  // Dialeg
+  items:= []*widget.FormItem{
+    widget.NewFormItem ( "Nom", name ),
+  }
+  d:= dialog.NewForm ( "Edita nom fitxer", "Aplica", "Cancel·la", items,
+    func(b bool){
+      if !b { return }
+      
+      if err:= e.UpdateFileName ( file_id, name.Text ); err != nil {
+        dialog.ShowError ( err, main_win )
+      } else {
+        list.Refresh ()
+        list_win.Update ()
+      }
+      
+    }, main_win )
+  csize:= main_win.Content ().Size ()
+  d.Resize ( fyne.Size{csize.Width*0.6,csize.Height*0.6} )
+  d.Show ()
+  
+} // end showEditFile
+
+
 type _AddFileProgressBar struct {
   pop  *widget.PopUp
   pb   *widget.ProgressBar
@@ -95,13 +135,13 @@ func (self *_AddFileProgressBar) Set( msg string, f float32 ) {
 
 func showAddFileEntry(
   
-  e        Entry,
-  model    DataModel,
-  main_win fyne.Window,
-  list     *widget.List,
-  list_win *List,
-  dv       *DetailsViewer,
-  
+  e         Entry,
+  model     DataModel,
+  main_win  fyne.Window,
+  list      *widget.List,
+  list_win  *List,
+  dv        *DetailsViewer,
+  statusbar *StatusBar,
 ) {
 
   // Obri dialeg
@@ -148,6 +188,7 @@ func showAddFileEntry(
             list.Refresh ()
             list_win.Refresh ()
             dv.Update ()
+            statusbar.Update ()
           }
         }, main_win )
       win_size:= main_win.Content ().Size ()
@@ -169,11 +210,15 @@ func createFileEntryItemTemplate () fyne.CanvasObject {
   name:= widget.NewLabel ( "Template Label Name" )
   
   // Botons
+  but_edit:= widget.NewButtonWithIcon ( "", theme.DocumentCreateIcon (),
+    func(){
+      fmt.Println ( "Edita!" )
+    })
   but_del:= widget.NewButtonWithIcon ( "", theme.DeleteIcon (),
     func(){
       fmt.Println ( "Esborra!" )
     })
-  but_box:= container.NewHBox ( but_del )
+  but_box:= container.NewHBox ( but_edit, but_del )
   
   return container.NewBorder ( nil, nil, nil, but_box, name )
   
@@ -182,14 +227,15 @@ func createFileEntryItemTemplate () fyne.CanvasObject {
 
 func updateFileEntryItem (
   
-  co       fyne.CanvasObject,
-  e        Entry,
-  model    DataModel,
-  list_win *List,
-  dv       *DetailsViewer,
-  id       int,
-  list     *widget.List,
-  main_win fyne.Window,
+  co        fyne.CanvasObject,
+  e         Entry,
+  model     DataModel,
+  list_win  *List,
+  dv        *DetailsViewer,
+  statusbar *StatusBar,
+  id        int,
+  list      *widget.List,
+  main_win  fyne.Window,
   
 ) {
 
@@ -203,25 +249,29 @@ func updateFileEntryItem (
   label.SetText ( f.GetName () )
   
   // Esborra
-  but_del:= but_box.Objects[0].(*widget.Button)
+  but_del:= but_box.Objects[1].(*widget.Button)
   but_del.OnTapped= func() {
     dialog.ShowConfirm ( "Eliminar fitxer",
       "Està segur que vol eliminar aquest fitxer?",
         func(ok bool) {
           if ok {
-            fmt.Println ( "ELIMINAT", f )
-            /*
-            if err:= e.RemoveLabel ( labels[id] ); err != nil {
+            if err:= e.RemoveFile ( files[id] ); err != nil {
               dialog.ShowError ( err, main_win )
             } else {
               list.Refresh ()
               list_win.Refresh ()
               dv.Update ()
+              statusbar.Update ()
             }
-            */
           }
         }, main_win )
-    }
+  }
+
+  // Edita
+  but_edit:= but_box.Objects[0].(*widget.Button)
+  but_edit.OnTapped= func() {
+    showEditFile ( e, f, files[id], main_win, list_win, list )
+  }
   
 } // end updateFileEntryItem
 
@@ -234,11 +284,12 @@ func updateFileEntryItem (
 
 func NewEditEntryFiles (
   
-  e        Entry,
-  model    DataModel,
-  list_win *List,
-  dv       *DetailsViewer,
-  main_win fyne.Window,
+  e         Entry,
+  model     DataModel,
+  list_win  *List,
+  dv        *DetailsViewer,
+  statusbar *StatusBar,
+  main_win  fyne.Window,
   
 ) fyne.CanvasObject {
 
@@ -255,13 +306,14 @@ func NewEditEntryFiles (
     return createFileEntryItemTemplate ()
   }
   list.UpdateItem= func( id widget.ListItemID, w fyne.CanvasObject ) {
-    updateFileEntryItem ( w, e, model, list_win, dv, id, list, main_win )
+    updateFileEntryItem ( w, e, model, list_win, dv, statusbar,
+      id, list, main_win )
   }
 
   // Botonera
   but_new:= widget.NewButtonWithIcon ( "Afegeix Fitxer",
     theme.ContentAddIcon (), func(){
-      showAddFileEntry ( e, model, main_win, list, list_win, dv )
+      showAddFileEntry ( e, model, main_win, list, list_win, dv, statusbar )
     })
   but_box:= container.NewHBox ( but_new )
   but_box= container.NewPadded ( but_box )

@@ -56,6 +56,9 @@ type FileType interface {
   // però es pot i es deu rebobinar.
   GetMetadata(fd *os.File) (string,error)
 
+  // Un nom curt sense espais i en majúscules
+  GetShortName() string
+  
 }
 
 

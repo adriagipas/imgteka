@@ -51,7 +51,7 @@ func New() (*Model,error) {
   if err != nil { return nil,err }
   plats:= NewPlatforms ( db )
   labels:= NewLabels ( db )
-  files:= NewFiles ( db )
+  files:= NewFiles ( db, plats, dirs )
   entries:= NewEntries ( db, plats, labels, files, dirs )
   stats:= NewStats ( db )
   

@@ -216,6 +216,31 @@ FROM ENTRIES;
 } // end GetNumEntries
 
 
+// NOTA!!! Aquesta funció caldrà actualitzar-la quan afegim els
+// filtres de cerca.
+func (self *Database) GetNumFiles() (int64,error) {
+
+    // Consulta base de dades
+  rows,err:= self.conn.Query ( `
+SELECT COUNT(*)
+FROM FILES;
+` )
+  if err != nil { return -1,err }
+  defer rows.Close ()
+
+  // Recorre consulta
+  if !rows.Next () {
+    return -1,errors.New ( "Error inesperat en Database.GetNumFiles" )
+  }
+  var ret int64
+  err= rows.Scan ( &ret )
+  if err != nil { return -1,err }
+  
+  return ret,rows.Err ()
+  
+} // end GetNumFiles
+
+
 func (self *Database) RollbackLastTransaction() error {
 
   if self.last_tx == nil {
@@ -585,6 +610,29 @@ func (self *Database) RegisterEntryLabelPair( id int64, label_id int ) error {
 
 // FILES ///////////////////////////////////////////////////////////////////////
 
+func (self *Database) DeleteFileWithoutCommit( id int64 ) error {
+
+  // Prepara
+  tx,err:= self.conn.Begin ()
+  if err != nil { log.Fatal ( err ) }
+  stmt,err:= tx.Prepare ( `
+DELETE FROM FILES WHERE id=?;
+` )
+  if err != nil { log.Fatal ( err ) }
+  defer stmt.Close ()
+  
+  // Elimina
+  _,err= stmt.Exec ( id )
+  if err != nil { tx.Rollback (); return err }
+  
+  // Registra transacció
+  self.last_tx= tx
+  
+  return nil
+  
+} // end DeleteFileWithoutCommit
+
+
 // S'enten que ja està, no deuria fallar
 func (self *Database) GetFile( id int64 ) (
   name       string,
@@ -600,7 +648,7 @@ func (self *Database) GetFile( id int64 ) (
   // Consulta base de dades
   rows,err:= self.conn.Query ( `
 SELECT name,entry_id,type,size,md5,sha1,extra_json,last_check
-FROM LABELS
+FROM FILES
 WHERE id = ?;
 `, id )
   if err != nil { log.Fatal ( err ) }
@@ -641,3 +689,69 @@ WHERE entry_id = ?;
   return rows.Err ()
   
 } // end LoadFilesEntry
+
+
+func (self *Database) RegisterFileWithoutCommit(
+
+  name       string,
+  entry_id   int64,
+  file_type  int,
+  size       int64,
+  md5        string,
+  sha1       string,
+  extra_json string,
+  last_check int64,
+  
+) error {
+
+  // Prepara
+  tx,err:= self.conn.Begin ()
+  if err != nil { log.Fatal ( err ) }
+  stmt,err:= tx.Prepare ( `
+   INSERT INTO FILES(name, entry_id, type, size, md5, sha1,
+                     extra_json, last_check)
+          VALUES(?,?,?,?,?,?,?,?);
+` )
+  if err != nil { log.Fatal ( err ) }
+  defer stmt.Close ()
+  
+  // Inserta
+  _,err= stmt.Exec ( name, entry_id, file_type, size, md5,
+    sha1, extra_json, last_check )
+  if err != nil { tx.Rollback (); return err }
+
+  // Registra transacció
+  self.last_tx= tx
+  
+  return nil
+  
+} // end RegisterEntryWithoutCommit
+
+
+func (self *Database) UpdateFileNameWithoutCommit(
+
+  id          int64,
+  name        string,
+  
+) error {
+
+  // Prepara
+  tx,err:= self.conn.Begin ()
+  if err != nil { log.Fatal ( err ) }
+  stmt,err:= tx.Prepare ( `
+UPDATE FILES SET name = ?
+       WHERE id = ?;
+` )
+  if err != nil { log.Fatal ( err ) }
+  defer stmt.Close ()
+  
+  // Inserta
+  _,err= stmt.Exec ( name, id )
+  if err != nil { tx.Rollback (); return err }
+  
+  // Registra transacció
+  self.last_tx= tx
+  
+  return nil
+  
+} // end UpdateFileNameWithoutCommit
