@@ -67,7 +67,12 @@ func RunEditEntryWin (
     container.NewPadded ( NewEditEntryFiles (
       e, model, list, dv, statusbar, main_win ) ),
   )
-  tabs:= container.NewAppTabs ( name_tab, labels_tab, files_tab )
+  cover_tab:= container.NewTabItem (
+    "Portada",
+    container.NewPadded ( NewEditEntryCover (
+      e, model, dv, main_win ) ),
+  )
+  tabs:= container.NewAppTabs ( name_tab, labels_tab, files_tab, cover_tab )
   
   // --> Botonera
   but_close:= widget.NewButtonWithIcon ( "Tanca", theme.CancelIcon (), func(){

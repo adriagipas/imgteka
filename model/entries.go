@@ -192,6 +192,11 @@ func (self *Entries) Get( id int64 ) *Entry {
 } // end Get
 
 
+func (self *Entries) GetFile( id int64 ) *File {
+  return self.files.Get ( id )
+} // end GetFile
+
+
 func (self *Entries) GetIDs() []int64 {
   return self.ids
 } // end GetIDs
@@ -294,7 +299,7 @@ func (self *Entries) RemoveFileEntry( id int64, file_id int64 ) error {
     return fmt.Errorf ( "La entrada (%id) no inclou el fitxer indicat (%d)",
       id, file_id)
   }
-
+  
   // Elimina
   if err:= self.files.Remove ( file_id, e ); err != nil {
     return err
@@ -314,6 +319,33 @@ func (self *Entries) RemoveLabelEntry( id int64, label_id int ) error {
   return nil
   
 } // end RemoveLabelEntry
+
+
+func (self *Entries) SetCoverEntry( id int64, file_id int64 ) error {
+
+  // Obtindre entrada
+  _,ok:= self.v[id]
+  if !ok { // No deuria passar
+    return fmt.Errorf ( "La entrada indicada (%d) no existeix", id )
+  }
+  
+  // Comprova que el fitxer pertany a l'entrada
+  if file_id != -1 {
+    f:= self.files.Get ( file_id )
+    if f.GetEntryID () != id {
+      return fmt.Errorf ( "La entrada (%id) no inclou el fitxer indicat (%d)",
+        id, file_id)
+    }
+  }
+
+  // Actualitza en la base de dades
+  if err:= self.db.UpdateEntryCover ( id, file_id ); err != nil {
+    return err
+  }
+
+  return nil
+  
+} // end SetCoverEntry
 
 
 func (self *Entries) UpdateEntryName( id int64, name string ) error {

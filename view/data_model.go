@@ -49,6 +49,10 @@ type StringPair interface {
 
 
 type File interface {
+
+  // Torna la imatge que representa el fitxer, o nil si no en té (o no
+  // es pot carregar)
+  GetImage() image.Image
   
   // Torna el nom del fitxer
   GetName() string
@@ -73,6 +77,10 @@ type Entry interface {
   // Torna els identificadors dels fitxers d'aquesta entrada. Són
   // globals, però diferents als de les entrades.
   GetFileIDs() []int64
+
+  // Torna els identificadors dels fitxers d'aquesta entrada que poden
+  // ser tractats com a imatges.
+  GetImageFileIDs() []int64
 
   // Torna la imatge de la portada. Pot tornar nil
   GetCover() image.Image
@@ -100,6 +108,10 @@ type Entry interface {
   
   // Elimina una etiqueta de l'entrada
   RemoveLabel(id int) error
+
+  // Fixa l'identificador del fitxer que serà la portada. -1 indica
+  // que no té portada.
+  SetCoverFileID(id int64) error
   
   // Actualitza el nom de l'entrada.
   UpdateName(name string) error

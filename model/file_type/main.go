@@ -24,7 +24,7 @@ package file_type
 
 import (
   "fmt"
-  "log"
+  "image"
   "os"
 )
 
@@ -47,6 +47,9 @@ const ID_IMAGE_PNG = 0x100
 
 type FileType interface {
 
+  // Torna la imatge del fitxer indicat (d'acord amb aquest tipus).
+  GetImage(file_name string) (image.Image,error)
+  
   // Aquest mètode te dos propòstis:
   //  1) Torna en un string un json amb les metadades particular
   //     d'aquest tipus
@@ -56,8 +59,14 @@ type FileType interface {
   // però es pot i es deu rebobinar.
   GetMetadata(fd *os.File) (string,error)
 
+  // Torna el nom
+  GetName() string
+  
   // Un nom curt sense espais i en majúscules
   GetShortName() string
+
+  // Indica si d'aquest tipus es pot obtindre una imatge
+  IsImage() bool
   
 }
 
@@ -74,6 +83,9 @@ var _IDS []int= []int{
   
 }
 
+// Tipus globals
+var _vPNG PNG= PNG{}
+
 
 
 
@@ -86,7 +98,7 @@ func Get( id int ) (FileType,error) {
   switch id {
     
   case ID_IMAGE_PNG:
-    return &PNG{},nil
+    return &_vPNG,nil
     
   default:
     return nil,fmt.Errorf ( "Tipus de fitxer desconegut:", id )
@@ -98,18 +110,3 @@ func Get( id int ) (FileType,error) {
 func GetIDs() []int {
   return _IDS
 } // end GetIDs
-
-
-func GetName( id int ) string {
-  
-  switch id {
-    
-  case ID_IMAGE_PNG:
-    return "Imatge PNG"
-    
-  default:
-    log.Fatal ( "Tipus de fitxer desconegut:", id )
-    return ""
-  }
-  
-} // end GetName

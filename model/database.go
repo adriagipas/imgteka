@@ -506,6 +506,18 @@ func (self *Database) RegisterEntryWithoutCommit(
 } // end RegisterEntryWithoutCommit
 
 
+func (self *Database) UpdateEntryCover( id int64, cover_id int64 ) error {
+
+  _,err:= self.conn.Exec ( `
+UPDATE ENTRIES SET cover_id = ?
+       WHERE id = ?;
+`, cover_id, id )
+  
+  return err
+  
+} // end UpdateEntryCover
+
+
 func (self *Database) UpdateEntryNameWithoutCommit(
 
   id          int64,

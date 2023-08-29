@@ -219,7 +219,7 @@ func (self *Files) Get( id int64 ) *File {
   if !ok {
     name,entry_id,file_type,size,md5,sha1,json,last_check:= 
       self.db.GetFile ( id )
-    ret= NewFile ( id, name, entry_id, file_type, size, md5,
+    ret= NewFile ( self.dirs, id, name, entry_id, file_type, size, md5,
       sha1, json, last_check )
     self.v[id]= ret
   }
@@ -348,70 +348,3 @@ func (self *Files) UpdateName( id int64, e *Entry, new_name string ) error {
   return nil
   
 } // end UpdateName
-
-
-
-
-// FILE ////////////////////////////////////////////////////////////////////////
-
-type File struct {
-  id        int64
-  name      string
-  entry     int64
-  file_type int
-  size      int64
-  md5       string
-  sha1      string
-  // TODO!! algunes coses com last_check i json
-}
-
-
-func NewFile(
-  
-  id         int64,
-  name       string,
-  entry      int64,
-  file_type  int,
-  size       int64,
-  md5        string,
-  sha1       string,
-  json       string,
-  last_check int64,
-  
-) *File {
-
-  ret:= File{
-    id        : id,
-    name      : name,
-    entry     : entry,
-    file_type : file_type,
-    size      : size,
-    md5       : md5,
-    sha1      : sha1,
-  }
-
-  return &ret
-  
-} // end NewFile
-
-
-func (self *File) GetEntryID() int64 { return self.entry }
-
-func (self *File) GetMetadata() []view.StringPair {
-  fmt.Println ( "TODO File.GetMetaData !" )
-  return make([]view.StringPair,0)
-} // end GetMetaData
-
-
-func (self *File) GetName() string { return self.name }
-func (self *File) GetTypeID() int { return self.file_type }
-
-
-type MetadataValue struct {
-  key   string
-  value string
-}
-
-
-func (self *MetadataValue) GetKey() string { return self.key }
-func (self *MetadataValue) GetValue() string { return self.value }

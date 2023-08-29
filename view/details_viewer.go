@@ -227,6 +227,15 @@ func (self *DetailsViewer) ViewFile ( f_id int64 ) {
     text,
   )
 
+  // Imatge
+  img:= f.GetImage ()
+  if img != nil {
+    img_w:= canvas.NewImageFromImage ( img )
+    img_w.FillMode= canvas.ImageFillContain
+    img_w.SetMinSize ( fyne.Size{1,1} )
+    card.SetImage ( img_w )
+  }
+  
   // Crea toolbar
   // NOTA!! En el futur el RUN el podem ficar sols si el tipus de
   // fitxer es pot executar.

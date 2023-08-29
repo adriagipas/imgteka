@@ -24,6 +24,7 @@ package model
 
 import (
   "image/color"
+  "log"
 
   "github.com/adriagipas/imgteka/model/file_type"
   "github.com/adriagipas/imgteka/view"
@@ -122,7 +123,14 @@ func (self *Model) GetFileTypeIDs() []int {
 
 
 func (self *Model) GetFileTypeName(id int) string {
-  return file_type.GetName ( id )
+  
+  ft,err:= file_type.Get ( id )
+  if err != nil {
+    log.Fatal ( err )
+  }
+
+  return ft.GetName ()
+  
 } // end GetFileTypeName
 
 

@@ -24,6 +24,7 @@ package file_type
 
 import (
   "fmt"
+  "image"
   "image/png"
   "os"
 )
@@ -32,6 +33,17 @@ import (
 
 type PNG struct {
 }
+
+
+func (self *PNG) GetImage( file_name string) (image.Image,error) {
+
+  f,err:= os.Open ( file_name )
+  if err != nil { return nil,err }
+  defer f.Close ()
+
+  return png.Decode ( f )
+  
+} // end GetImage
 
 
 func (self *PNG) GetMetadata(fd *os.File) (string,error) {
@@ -54,4 +66,6 @@ func (self *PNG) GetMetadata(fd *os.File) (string,error) {
 } // end GetMetadata
 
 
+func (self *PNG) GetName() string { return "Imatge PNG" }
 func (self *PNG) GetShortName() string { return "PNG" }
+func (self *PNG) IsImage() bool { return true }

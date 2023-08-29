@@ -53,9 +53,10 @@ func (self *Entry) addLabelID( id int ) {
 
 
 func (self *Entry) resetFiles() {
-
+  
   // Prepara
   self.files.ids= self.files.ids[:0]
+  self.files.loaded_img= false
   
   // Carrega valors
   if err:= self.entries.LoadFiles ( self.id ); err != nil {
@@ -110,8 +111,10 @@ type Entry struct {
 
   // Relacionat amb els fitxers
   files struct {
-    loaded bool // Indica si s'ha inicialitzat
-    ids    []int64
+    loaded     bool // Indica si s'ha inicialitzat
+    ids        []int64
+    loaded_img bool
+    ids_img    []int64
   }
   
 }
@@ -144,6 +147,8 @@ func NewEntry(
   // Relacionat amb els fitxers
   ret.files.loaded= false
   ret.files.ids= nil
+  ret.files.loaded_img= false
+  ret.files.ids_img= nil
   
   return ret
   
@@ -192,12 +197,12 @@ func (self *Entry) GetCover() image.Image {
 
   var ret image.Image
   if ( self.cover != -1 ) {
-    fmt.Println ( "TODO Entry.GetCover !" )
-    ret= nil
+    f:= self.entries.GetFile ( self.cover )
+    ret= f.GetImage ()
   } else {
     ret= nil
   }
-
+  
   return ret
   
 } // end GetCover
@@ -218,6 +223,30 @@ func (self *Entry) GetFileIDs() []int64 {
 func (self *Entry) GetID() int64 { return self.id }
 
 
+func (self *Entry) GetImageFileIDs() []int64 {
+
+  // Carrega si no s'ha carregat mai
+  if !self.files.loaded {
+    self.resetFiles ()
+  }
+
+  // Carrega identificadors imatges
+  if !self.files.loaded_img {
+    self.files.ids_img= self.files.ids_img[:0]
+    for _,fid:= range self.files.ids {
+      f:= self.entries.GetFile ( fid )
+      if f.IsImage () {
+        self.files.ids_img= append(self.files.ids_img,fid)
+      }
+    }
+    self.files.loaded_img= true
+  }
+  
+  return self.files.ids_img
+  
+} // end GetImageFileIDs
+
+
 func (self *Entry) GetLabelIDs() []int {
 
   // Carrega si no s'ha carregat mai
@@ -231,6 +260,8 @@ func (self *Entry) GetLabelIDs() []int {
 
 
 func (self *Entry) GetName() string { return self.name }
+
+
 func (self *Entry) GetPlatformID() int { return self.platform }
 
 
@@ -262,6 +293,16 @@ func (self *Entry) RemoveFile( id int64 ) error {
     self.resetFiles ()
   }
 
+  // Abans d'intentar eliminar l'entrada lleva la portada si 'id'
+  // coincideix amb la portada. Si després eliminar falla simplement
+  // haurà desaparegut la portada, però es pot tornar a ficar sense
+  // problemes.
+  if self.cover == id {
+    if err:= self.SetCoverFileID ( -1 ); err != nil {
+      return err
+    }
+  }
+  
   // Elimina
   if err:= self.entries.RemoveFileEntry ( self.id, id ); err != nil {
     return err
@@ -299,6 +340,18 @@ func (self *Entry) RemoveLabel( id int ) error {
   return nil
   
 } // end RemoveLabel
+
+
+func (self *Entry) SetCoverFileID( id int64 ) error {
+
+  if err:= self.entries.SetCoverEntry ( self.id, id ); err != nil {
+    return err
+  }
+  self.cover= id
+
+  return nil
+  
+} // end SetCoverFileID
 
 
 func (self *Entry) UpdateName( name string ) error {
