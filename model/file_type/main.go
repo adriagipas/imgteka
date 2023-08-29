@@ -26,6 +26,8 @@ import (
   "fmt"
   "image"
   "os"
+
+  "github.com/adriagipas/imgteka/view"
 )
 
 
@@ -51,8 +53,7 @@ type FileType interface {
   GetImage(file_name string) (image.Image,error)
   
   // Aquest mètode te dos propòstis:
-  //  1) Torna en un string un json amb les metadades particular
-  //     d'aquest tipus
+  //  1) Torna en un string amb les metadades.
   //  2) Comprovar que efectivament el fitxer és del tipus indicat.
   //
   // NOTA! El 'fd' no té perquè estar apuntant al principi del fitxer,
@@ -67,8 +68,19 @@ type FileType interface {
 
   // Indica si d'aquest tipus es pot obtindre una imatge
   IsImage() bool
+
+  // Parseja el string que conté el json i afegeix els valors al
+  // StringPairs.
+  ParseMetadata(v []view.StringPair,meta_data string) []view.StringPair
   
 }
+
+
+type KeyValue struct {
+  key,value string
+}
+func (self *KeyValue) GetKey() string { return self.key }
+func (self *KeyValue) GetValue() string { return self.value }
 
 
 

@@ -34,7 +34,33 @@ import (
 
 
 
+// UTILS ///////////////////////////////////////////////////////////////////////
+
+func size2text( size int64 ) string {
+
+  var ret string
+  
+  if size < 1024 { // Bytes
+    ret= fmt.Sprintf ( "%d B", size )
+  } else if size < 1024*1024 { // KB
+    ret= fmt.Sprintf ( "%.1f KB (%d B)", float32(size)/1024, size )
+  } else if size < 1024*1024*1024 { // MB
+    ret= fmt.Sprintf ( "%.1f MB (%d B)", float32(size)/(1024*1024), size )
+  } else {
+    ret= fmt.Sprintf ( "%.1f GB (%d B)", float32(size)/(1024*1024*1024), size )
+  }
+
+  return ret
+  
+} // end size2text
+
+
+
+
+// FILE ////////////////////////////////////////////////////////////////////////
+
 type File struct {
+  
   dirs         *Dirs
   id           int64
   name         string
@@ -44,7 +70,10 @@ type File struct {
   size         int64
   md5          string
   sha1         string
-  // TODO!! algunes coses com last_check i json
+
+  // Metadata
+  md []view.StringPair
+  
 }
 
 
@@ -63,6 +92,7 @@ func NewFile(
   
 ) *File {
 
+  // Crea objecte
   ret:= File{
     dirs         : dirs,
     id           : id,
@@ -76,6 +106,13 @@ func NewFile(
   var err error
   ret.file_type,err= file_type.Get ( file_type_id )
   if err != nil { log.Fatal ( err ) }
+
+  // Crea metadata
+  ret.md= make([]view.StringPair,3)
+  ret.md[0]= &MetadataValue{"md5",md5}
+  ret.md[1]= &MetadataValue{"sha1",sha1}
+  ret.md[2]= &MetadataValue{"Grandària",size2text ( size )}
+  ret.md= ret.file_type.ParseMetadata ( ret.md, json )
   
   return &ret
   
@@ -106,10 +143,7 @@ func (self *File) GetImage() image.Image {
 } // end GetImage
 
 
-func (self *File) GetMetadata() []view.StringPair {
-  fmt.Println ( "TODO File.GetMetaData !" )
-  return make([]view.StringPair,0)
-} // end GetMetaData
+func (self *File) GetMetadata() []view.StringPair { return self.md }
 
 
 func (self *File) GetName() string { return self.name }
