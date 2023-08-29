@@ -17,7 +17,7 @@
  * along with adriagipas/imgteka.  If not, see <https://www.gnu.org/licenses/>.
  */
 /*
- *  file_type.go - Tipus de fitxer PNG.
+ *  png.go - Tipus de fitxer PNG.
  */
 
 package file_type

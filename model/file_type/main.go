@@ -40,6 +40,8 @@ import (
 // IDENTIFICADORS
 const ID_IMAGE_PNG = 0x100
 
+const ID_ROM_GG    = 0x200
+
 
 
 
@@ -92,11 +94,14 @@ func (self *KeyValue) GetValue() string { return self.value }
 var _IDS []int= []int{
   
   ID_IMAGE_PNG,
+
+  ID_ROM_GG,
   
 }
 
 // Tipus globals
 var _vPNG PNG= PNG{}
+var _vGG GG= GG{}
 
 
 
@@ -111,6 +116,9 @@ func Get( id int ) (FileType,error) {
     
   case ID_IMAGE_PNG:
     return &_vPNG,nil
+
+  case ID_ROM_GG:
+    return &_vGG,nil
     
   default:
     return nil,fmt.Errorf ( "Tipus de fitxer desconegut:", id )
