@@ -100,6 +100,22 @@ func linkFile( oldname string, newname string ) error {
 } // end linkFile
 
 
+func readLink( path string ) (string,error) {
+  
+  info,err:= os.Lstat ( path )
+  if err != nil { return path,err }
+  for ;(info.Mode ()&os.ModeSymlink) != 0; {
+    path,err= os.Readlink ( path )
+    if err != nil { return path,err }
+    info,err= os.Lstat ( path )
+    if err != nil { return path,err }
+  }
+  
+  return path,nil
+  
+} // end readLink
+
+
 
 
 // FILES ///////////////////////////////////////////////////////////////////////
@@ -143,6 +159,10 @@ func (self *Files) Add(
 
   // Comprova existeix i grandària
   pb.Set ( "Comprova que existeix...", 0.1 )
+  path,err:= readLink ( path )
+  if err != nil {
+    return fmt.Errorf ( "No s'ha pogut accedir al fitxer '%s': %s", path, err )
+  }
   f,err:= os.Open ( path )
   if err != nil {
     return fmt.Errorf ( "No s'ha pogut obrir el fitxer '%s': %s", path, err )
