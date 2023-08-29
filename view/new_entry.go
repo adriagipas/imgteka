@@ -43,6 +43,12 @@ func ShowNewEntryDialog(
 
   // Plataforma
   pids:= model.GetPlatformIDs ()
+  if len(pids) == 0 {
+    dialog.ShowInformation ( "Nova entrada",
+      "No es poden crear noves entrades sense definir abans "+
+        "alguna plataforma", main_win )
+    return
+  }
   options:= make([]string,len(pids))
   plat_text2id:= make(map[string]int)
   for i,id:= range pids {
