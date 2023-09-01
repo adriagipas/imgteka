@@ -160,14 +160,6 @@ func (self *DetailsViewer) ViewEntry ( e_id int64, list *List ) {
     self.model.GetPlatform ( e.GetPlatformID () ).GetName (),
     content,
   )
-  // --> Portada
-  cover:= e.GetCover ()
-  if cover != nil {
-    img:= canvas.NewImageFromImage ( cover )
-    img.FillMode= canvas.ImageFillContain
-    //img.SetMinSize ( fyne.Size{1,1} )
-    card.SetImage ( img )
-  }
   
   // Crea toolbar
   toolbar:= widget.NewToolbar (
@@ -192,8 +184,23 @@ func (self *DetailsViewer) ViewEntry ( e_id int64, list *List ) {
     }),
   )
   
+  // --> Portada
+  cover:= e.GetCover ()
+  var img *canvas.Image
+  if cover != nil {
+    img= canvas.NewImageFromImage ( cover )
+    img.FillMode= canvas.ImageFillContain
+    //img.FillMode= canvas.ImageFillStretch
+    img.Translucency= 0.8
+  } else {
+    img= nil
+  }
+  
   // Afegeix
   tmp:= container.NewVBox ( container.NewHScroll ( card ), toolbar )
+  if img != nil {
+    tmp= container.NewMax ( tmp, img )
+  } 
   self.root.Add ( tmp )
   
 } // end ViewEntry
