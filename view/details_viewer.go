@@ -72,7 +72,8 @@ func (self *DetailsViewer) newLabel ( id int ) fyne.CanvasObject {
 /****************/
 
 type DetailsViewer struct {
-  
+
+  canvas    fyne.CanvasObject
   root      *fyne.Container // Contenedor intern que es modifica
   model     DataModel
   statusbar *StatusBar
@@ -95,7 +96,6 @@ func NewDetailsViewer (
 ) *DetailsViewer {
 
   ret:= DetailsViewer{
-    root      : container.NewVBox (),
     model     : model,
     statusbar : statusbar,
     win       : main_win,
@@ -104,13 +104,15 @@ func NewDetailsViewer (
     current_fe : -1,
     
   }
+  ret.root= container.NewVBox ()
+  ret.canvas= container.NewVScroll ( ret.root )
   
   return &ret
   
 } // end NewDetailsViewer
 
 
-func (self *DetailsViewer) GetCanvas() fyne.CanvasObject { return self.root }
+func (self *DetailsViewer) GetCanvas() fyne.CanvasObject { return self.canvas }
 
 
 func (self *DetailsViewer) Clean() {
@@ -190,17 +192,18 @@ func (self *DetailsViewer) ViewEntry ( e_id int64, list *List ) {
   if cover != nil {
     img= canvas.NewImageFromImage ( cover )
     img.FillMode= canvas.ImageFillContain
-    //img.FillMode= canvas.ImageFillStretch
-    img.Translucency= 0.8
+    img.SetMinSize ( fyne.Size{250,250} )
   } else {
     img= nil
   }
   
   // Afegeix
-  tmp:= container.NewVBox ( container.NewHScroll ( card ), toolbar )
+  var tmp *fyne.Container
   if img != nil {
-    tmp= container.NewMax ( tmp, img )
-  } 
+    tmp= container.NewVBox ( img, container.NewHScroll ( card ), toolbar )
+  } else {
+    tmp= container.NewVBox ( container.NewHScroll ( card ), toolbar )
+  }
   self.root.Add ( tmp )
   
 } // end ViewEntry
@@ -266,7 +269,7 @@ func (self *DetailsViewer) Update() {
     
   case _DETAILS_VIEWER_FILE:
     self.ViewFile ( self.current_fe )
-
+    
   case _DETAILS_VIEWER_ENTRY:
     self.ViewEntry ( self.current_fe, self.list )
     
