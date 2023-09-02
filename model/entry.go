@@ -193,12 +193,12 @@ func (self *Entry) AddLabel( id int ) error {
 } // end AddLabel
 
 
-func (self *Entry) GetCover() image.Image {
+func (self *Entry) GetCover( max_wh int ) image.Image {
 
   var ret image.Image
   if ( self.cover != -1 ) {
     f:= self.entries.GetFile ( self.cover )
-    ret= f.GetImage ()
+    ret= f.GetImage ( max_wh )
   } else {
     ret= nil
   }

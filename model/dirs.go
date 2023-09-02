@@ -24,6 +24,7 @@ package model
 
 import (
   "path"
+  "strconv"
   
   "github.com/adrg/xdg"
 )
@@ -141,7 +142,20 @@ func (self *Dirs) GetFileNameTemp(
   tmp:= path.Join ( _ROOT_NAME, _ROOT_FILES, file_type, name )
   ret,err:= xdg.CacheFile ( tmp )
   if err != nil { return "",err }
-
+  
   return ret,nil
   
 } // end GetFileNameTemp
+
+
+func (self *Dirs) GetCachedImageName( max_wh int, id string ) (string,error) {
+
+  
+  tmp:= path.Join ( _ROOT_NAME, "images",
+    strconv.FormatInt ( int64(max_wh), 10 ), id )
+  ret,err:= xdg.CacheFile ( tmp )
+  if err != nil { return "",err }
+  
+  return ret,nil
+  
+} // end GetCachedImageName

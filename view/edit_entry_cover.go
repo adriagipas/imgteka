@@ -98,11 +98,11 @@ func NewEditEntryCover (
     // Actualitza imatge
     img_box.RemoveAll ()
     if fid != -1 {
-      img:= model.GetFile ( fid ).GetImage ()
+      img:= model.GetFile ( fid ).GetImage ( 250 )
       if img != nil {
         img_w:= canvas.NewImageFromImage ( img )
         img_w.FillMode= canvas.ImageFillContain
-        img_w.SetMinSize ( fyne.Size{300,300} )
+        img_w.SetMinSize ( fyne.Size{250,250} )
         img_box.Add ( img_w )
       }
     }

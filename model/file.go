@@ -25,14 +25,21 @@ package model
 import (
   "fmt"
   "image"
+  "image/png"
   "log"
+  "os"
   
   "github.com/adriagipas/imgteka/model/file_type"
   "github.com/adriagipas/imgteka/view"
+  "github.com/nfnt/resize"
 )
 
 
 
+
+/****************/
+/* PART PRIVADA */
+/****************/
 
 // UTILS ///////////////////////////////////////////////////////////////////////
 
@@ -55,9 +62,64 @@ func size2text( size int64 ) string {
 } // end size2text
 
 
+// Torna nil si no està cacheada o no s'ha pogut carregar.
+func loadCachedImage( max_wh int, file_name string ) image.Image {
+
+  f,err:= os.Open ( file_name )
+  if err != nil { return nil }
+  defer f.Close ()
+
+  ret,err:= png.Decode ( f )
+  if err != nil {
+    log.Printf ( "No s'ha pogut carregar imatge del fitxer '%s'"+
+      " de memòria cau: %s", file_name, err )
+    return nil
+  }
+  
+  return ret
+  
+} // end loadCachedImage
 
 
-// FILE ////////////////////////////////////////////////////////////////////////
+// Reescala i cachea. Torna la imatge reescalada.
+func resizeAndCacheImage(
+
+  img       image.Image,
+  max_wh    int,
+  file_name string,
+
+) image.Image {
+
+  // Reescala
+  bounds:= img.Bounds ()
+  width:= bounds.Max.X - bounds.Min.X
+  height:= bounds.Max.Y - bounds.Min.Y
+  if width >= height {
+    img= resize.Resize ( uint(max_wh), 0, img, resize.NearestNeighbor )
+  } else {
+    img= resize.Resize ( 0, uint(max_wh), img, resize.NearestNeighbor )
+  }
+
+  // Desa en memòria cau.
+  f,err:= os.Create ( file_name )
+  if err != nil {
+    log.Printf ( "No s'ha pogut creat el fitxer '%s': %s", file_name, err ) 
+  }
+  defer f.Close ()
+  if err:= png.Encode ( f, img ); err != nil {
+    log.Printf ( "No s'ha pogut desar la imatge en '%s': %s", file_name, err )
+  }
+
+  return img
+  
+} // resizeAndCacheImage
+
+
+
+
+/****************/
+/* PART PÚBLICA */
+/****************/
 
 type File struct {
   
@@ -122,18 +184,43 @@ func NewFile(
 func (self *File) GetEntryID() int64 { return self.entry }
 
 
-func (self *File) GetImage() image.Image {
+func (self *File) GetImage( max_wh int ) image.Image {
 
   var ret image.Image
-  var err error
   
   if self.file_type.IsImage () {
-    ret,err= self.file_type.GetImage ( self.GetPath () )
+
+    // Nom en la cache
+    cache_name:= fmt.Sprintf ( "%d-%s.png", self.id, self.md5)
+    cache_fn,err:= self.dirs.GetCachedImageName ( max_wh, cache_name )
     if err != nil {
-      log.Printf ( "Error al intentar llegir la imatge de '%s': %s",
-        self.GetPath (), err )
-      ret= nil
+      log.Printf ( "Error inesperat en File.GetImage: %s", err )
+      return nil
     }
+
+    // Prova en la cache.
+    if ret= loadCachedImage ( max_wh, cache_fn ); ret == nil {
+
+      var err error
+      
+      // Si no està carrega original.
+      ret,err= self.file_type.GetImage ( self.GetPath () )
+      if err != nil {
+        log.Printf ( "Error al intentar llegir la imatge de '%s': %s",
+          self.GetPath (), err )
+        ret= nil
+      }
+
+      // Si és molt gran intenta cache
+      bounds:= ret.Bounds ()
+      width:= bounds.Max.X - bounds.Min.X
+      height:= bounds.Max.Y - bounds.Min.Y
+      if width > max_wh || height > max_wh {
+        ret= resizeAndCacheImage ( ret, max_wh, cache_fn )
+      }
+      
+    }
+    
   } else {
     ret= nil
   }

@@ -51,8 +51,8 @@ type StringPair interface {
 type File interface {
 
   // Torna la imatge que representa el fitxer, o nil si no en té (o no
-  // es pot carregar)
-  GetImage() image.Image
+  // es pot carregar). S'indica l'ample i alt màxims.
+  GetImage(max_wh int) image.Image
   
   // Torna el nom del fitxer
   GetName() string
@@ -82,9 +82,10 @@ type Entry interface {
   // ser tractats com a imatges.
   GetImageFileIDs() []int64
 
-  // Torna la imatge de la portada. Pot tornar nil
-  GetCover() image.Image
-
+  // Torna la imatge de la portada. Pot tornar nil. S'indica
+  // l'amplària i altura màxima.
+  GetCover(max_wh int) image.Image
+  
   // Torna els identificadors de les etiquetes que té aquesta entrada.
   GetLabelIDs() []int
 

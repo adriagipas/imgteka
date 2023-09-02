@@ -187,7 +187,7 @@ func (self *DetailsViewer) ViewEntry ( e_id int64, list *List ) {
   )
   
   // --> Portada
-  cover:= e.GetCover ()
+  cover:= e.GetCover ( 300 )
   var img *canvas.Image
   if cover != nil {
     img= canvas.NewImageFromImage ( cover )
@@ -238,7 +238,7 @@ func (self *DetailsViewer) ViewFile ( f_id int64 ) {
   )
 
   // Imatge
-  img:= f.GetImage ()
+  img:= f.GetImage ( 200 )
   if img != nil {
     img_w:= canvas.NewImageFromImage ( img )
     img_w.FillMode= canvas.ImageFillContain

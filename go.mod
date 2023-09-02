@@ -8,7 +8,10 @@ require github.com/godbus/dbus/v5 v5.1.0
 
 require github.com/adrg/xdg v0.4.0
 
-require github.com/mattn/go-sqlite3 v1.14.17
+require (
+	github.com/mattn/go-sqlite3 v1.14.17
+	github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646
+)
 
 require (
 	fyne.io/systray v1.10.1-0.20230602210930-b6a2d6ca2a7b // indirect
@@ -24,7 +27,6 @@ require (
 	github.com/goki/freetype v0.0.0-20220119013949-7a161fd3728c // indirect
 	github.com/gopherjs/gopherjs v1.17.2 // indirect
 	github.com/jsummers/gobmp v0.0.0-20151104160322-e2ba15ffa76e // indirect
-	github.com/mattn/go-sqlite3 v1.14.17 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/srwiley/oksvg v0.0.0-20220731023508-a61f04f16b76 // indirect
 	github.com/srwiley/rasterx v0.0.0-20210519020934-456a8d69b780 // indirect
