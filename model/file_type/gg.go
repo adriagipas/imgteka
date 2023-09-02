@@ -97,7 +97,7 @@ func (self *GG) GetMetadata(fd *os.File) (string,error) {
   n,err:= fd.Read ( mem )
   if err != nil { return "",err }
   if n != read_nbanks*_GG_BANK_SIZE {
-    return "",errors.New ( "Error llegit les dades" )
+    return "",errors.New ( "Error llegint les dades" )
   }
 
   // Localitza capçalera
