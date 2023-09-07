@@ -62,6 +62,9 @@ type File interface {
 
   // Torna metadades associades a aquest fitxer
   GetMetadata() []StringPair
+
+  // "Executa" el fitxer.
+  Run() error
   
 }
 
@@ -204,6 +207,14 @@ type DataModel interface {
 
   // Obté el nom d'un tipus
   GetFileTypeName(id int) string
+
+  // Obté el comandament per un tipus de fitxer. Si no en té,
+  // aleshores cadena buida.
+  GetFileTypeCommand(id int) string
+
+  // Fixa comandament per a un tipus de fitxer. Cadena buida elimina
+  // el comandament.
+  SetFileTypeCommand(id int,command string)
   
   // Afegeix una nova plataforma
   AddPlatform(short_name string,name string,c color.Color) error

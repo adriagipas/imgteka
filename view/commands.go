@@ -23,7 +23,6 @@
 package view
 
 import (
-  "fmt"
   
   "fyne.io/fyne/v2"
   "fyne.io/fyne/v2/container"
@@ -46,16 +45,23 @@ func NewCommandsManager(
   
 ) fyne.CanvasObject {
 
+  tids:= model.GetFileTypeIDs ()
+  entries:= make([]*widget.Entry,len(tids))
   form:= widget.NewForm ()
-  for _,tid:= range model.GetFileTypeIDs () {
+  for i,tid:= range model.GetFileTypeIDs () {
     text:= model.GetFileTypeName ( tid )
-    ltid:= tid
     entry:= widget.NewEntry ()
-    entry.OnSubmitted= func(text string) {
-      fmt.Println ( "CHANGED COMMAND", text, ltid )
-    }
+    entry.Text= model.GetFileTypeCommand ( tids[i] )
     form.Append ( text, entry )
+    entries[i]= entry
   }
+  form.SubmitText= "Aplica"
+  form.OnSubmit= func() {
+    for i:= 0; i < len(tids); i++ {
+      model.SetFileTypeCommand ( tids[i], entries[i].Text )
+    }
+  }
+  form.Refresh ()
   
   return container.NewVScroll ( form )
   

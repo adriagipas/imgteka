@@ -41,6 +41,7 @@ type Model struct {
   files   *Files
   entries *Entries
   stats   *Stats
+  cmds    *Commands
 }
 
 
@@ -48,11 +49,13 @@ func New() (*Model,error) {
 
   // Crea objectes
   dirs:= NewDirs ()
+  cmds,err:= NewCommands ( dirs )
+  if err != nil { return nil,err }
   db,err:= NewDatabase ( dirs )
   if err != nil { return nil,err }
   plats:= NewPlatforms ( db )
   labels:= NewLabels ( db )
-  files:= NewFiles ( db, plats, dirs )
+  files:= NewFiles ( db, plats, dirs, cmds )
   entries:= NewEntries ( db, plats, labels, files, dirs )
   stats:= NewStats ( db )
   
@@ -65,6 +68,7 @@ func New() (*Model,error) {
     files   : files,
     entries : entries,
     stats   : stats,
+    cmds    : cmds,
   }
   
   return &ret,nil
@@ -73,7 +77,10 @@ func New() (*Model,error) {
 
 
 func (self *Model) Close() {
+  
   self.db.Close ()
+  self.cmds.Close ()
+  
 } // end Close
 
 
@@ -122,7 +129,7 @@ func (self *Model) GetFileTypeIDs() []int {
 } // end GetFileTypeIDs
 
 
-func (self *Model) GetFileTypeName(id int) string {
+func (self *Model) GetFileTypeName( id int ) string {
   
   ft,err:= file_type.Get ( id )
   if err != nil {
@@ -132,6 +139,15 @@ func (self *Model) GetFileTypeName(id int) string {
   return ft.GetName ()
   
 } // end GetFileTypeName
+
+func (self *Model) GetFileTypeCommand( id int ) string {
+  return self.cmds.GetCommand ( id )
+} // end GetFileTypeCommand
+
+
+func (self *Model) SetFileTypeCommand( id int, command string ) {
+  self.cmds.SetCommand ( id, command )
+} // end SetFileTypeCommand
 
 
 func (self *Model) AddPlatform(

@@ -61,7 +61,7 @@ func RunConfigWin (
     container.NewPadded ( NewLabelsManager ( model, dv, main_win ) ),
   )
   commands_tab:= container.NewTabItem (
-    "Execució fitxers",
+    "Comandaments",
     container.NewPadded ( NewCommandsManager ( model, main_win ) ),
   )
   tabs:= container.NewAppTabs ( plats_tab, labels_tab, commands_tab )

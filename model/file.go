@@ -124,6 +124,7 @@ func resizeAndCacheImage(
 type File struct {
   
   dirs         *Dirs
+  cmds         *Commands
   id           int64
   name         string
   entry        int64
@@ -142,6 +143,7 @@ type File struct {
 func NewFile(
 
   dirs        *Dirs,
+  cmds        *Commands,
   id           int64,
   name         string,
   entry        int64,
@@ -157,6 +159,7 @@ func NewFile(
   // Crea objecte
   ret:= File{
     dirs         : dirs,
+    cmds         : cmds,
     id           : id,
     name         : name,
     entry        : entry,
@@ -253,6 +256,11 @@ func (self *File) GetTypeID() int { return self.file_type_id }
 func (self *File) IsImage() bool {
   return self.file_type.IsImage ()
 } // end IsImage
+
+
+func (self *File) Run() error {
+  return self.cmds.Run ( self.file_type_id, self.GetPath () )
+} // end Run
 
 
 

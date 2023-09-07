@@ -124,16 +124,25 @@ type Files struct {
   db    *Database
   plats *Platforms
   dirs  *Dirs
+  cmds  *Commands
   v     map[int64]*File
 }
 
 
-func NewFiles ( db *Database, plats *Platforms, dirs *Dirs ) *Files {
+func NewFiles (
+  
+  db    *Database,
+  plats *Platforms,
+  dirs  *Dirs,
+  cmds  *Commands,
+
+) *Files {
 
   ret:= Files{
     db    : db,
     plats : plats,
     dirs  : dirs,
+    cmds  : cmds,
     v     : nil,
   }
   ret.v= make(map[int64]*File)
@@ -239,8 +248,8 @@ func (self *Files) Get( id int64 ) *File {
   if !ok {
     name,entry_id,file_type,size,md5,sha1,json,last_check:= 
       self.db.GetFile ( id )
-    ret= NewFile ( self.dirs, id, name, entry_id, file_type, size, md5,
-      sha1, json, last_check )
+    ret= NewFile ( self.dirs, self.cmds, id, name, entry_id,
+      file_type, size, md5, sha1, json, last_check )
     self.v[id]= ret
   }
   

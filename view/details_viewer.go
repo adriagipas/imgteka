@@ -242,7 +242,6 @@ func (self *DetailsViewer) ViewFile ( f_id int64 ) {
   if img != nil {
     img_w:= canvas.NewImageFromImage ( img )
     img_w.FillMode= canvas.ImageFillContain
-    //img_w.SetMinSize ( fyne.Size{1,1} )
     card.SetImage ( img_w )
   }
   
@@ -252,7 +251,9 @@ func (self *DetailsViewer) ViewFile ( f_id int64 ) {
   toolbar:= widget.NewToolbar (
     widget.NewToolbarSpacer (),
     widget.NewToolbarAction ( theme.MediaPlayIcon (), func() {
-      fmt.Println ( "PLAY BUTTON!!!!" )
+      if err:= f.Run (); err != nil {
+        dialog.ShowError ( err, self.win )
+      }
     }),
   )
   

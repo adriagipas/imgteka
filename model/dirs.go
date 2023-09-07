@@ -48,7 +48,8 @@ const _ROOT_FILES= "files"
 /****************/
 
 type Dirs struct {
-  db_name *string // Nom base de dades
+  db_name  *string // Nom base de dades
+  cmd_name *string // Nom json commandaments
 }
 
 
@@ -56,6 +57,7 @@ func NewDirs() *Dirs {
   
   ret:= Dirs{
     db_name : nil,
+    cmd_name : nil,
   }
 
   return &ret
@@ -81,6 +83,26 @@ func (self *Dirs) GetDatabaseName() (string,error) {
   return ret,err
   
 } // end GetDatabaseName
+
+
+func (self *Dirs) GetCommandsConfName() (string,error) {
+
+  var ret string
+  var err error
+  
+  if self.cmd_name == nil {
+    path:= path.Join ( _ROOT_NAME, "commands.json" )
+    ret,err= xdg.DataFile ( path )
+    if err == nil {
+      self.cmd_name= &ret
+    }
+  } else {
+    ret,err= *self.cmd_name,nil
+  }
+  
+  return ret,err
+  
+} // end GetCommandsConfName
 
 
 func (self *Dirs) GetEntryFolder(
