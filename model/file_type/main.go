@@ -45,6 +45,7 @@ const ID_IMAGE_JPEG = 0x101
 
 const ID_ROM_GG     = 0x200
 const ID_ROM_GBC    = 0x201
+const ID_ROM_MD     = 0x202
 
 
 
@@ -102,6 +103,7 @@ var _IDS []int= []int{
 
   ID_ROM_GBC,
   ID_ROM_GG,
+  ID_ROM_MD,
   
 }
 
@@ -110,6 +112,7 @@ var _vPNG PNG= PNG{}
 var _vJPEG JPEG= JPEG{}
 var _vGBC GBC= GBC{}
 var _vGG GG= GG{}
+var _vMD MD= MD{}
 
 
 
@@ -131,6 +134,8 @@ func Get( id int ) (FileType,error) {
     return &_vGBC,nil
   case ID_ROM_GG:
     return &_vGG,nil
+  case ID_ROM_MD:
+    return &_vMD,nil
     
   default:
     return nil,fmt.Errorf ( "Tipus de fitxer desconegut:", id )
