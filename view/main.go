@@ -39,6 +39,7 @@ func Run ( model DataModel ) error {
   a.Lifecycle ().SetOnStopped ( func() {
     fmt.Println ( "Adéu!!!!" )
   })
+  a.Settings ().SetTheme ( &ImgtekaTheme{} ) 
   win:= a.NewWindow ( "imgteka" )
   win.CenterOnScreen ()
 
