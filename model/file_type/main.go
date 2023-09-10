@@ -47,6 +47,8 @@ const ID_ROM_GG     = 0x200
 const ID_ROM_GBC    = 0x201
 const ID_ROM_MD     = 0x202
 
+const ID_ARCH_ZIP   = 0x300
+
 
 
 
@@ -104,6 +106,8 @@ var _IDS []int= []int{
   ID_ROM_GBC,
   ID_ROM_GG,
   ID_ROM_MD,
+
+  ID_ARCH_ZIP,
   
 }
 
@@ -113,6 +117,7 @@ var _vJPEG JPEG= JPEG{}
 var _vGBC GBC= GBC{}
 var _vGG GG= GG{}
 var _vMD MD= MD{}
+var _vZIP ZIP= ZIP{}
 
 
 
@@ -136,6 +141,9 @@ func Get( id int ) (FileType,error) {
     return &_vGG,nil
   case ID_ROM_MD:
     return &_vMD,nil
+
+  case ID_ARCH_ZIP:
+    return &_vZIP,nil
     
   default:
     return nil,fmt.Errorf ( "Tipus de fitxer desconegut:", id )
