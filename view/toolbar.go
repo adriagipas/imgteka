@@ -65,6 +65,7 @@ func NewToolbar (
     model.FilterEntries ( text )
     list.Update ()
     status_bar.Update ()
+    main_win.Canvas ().Focus ( list )
   }
   search_bar:= container.NewBorder ( nil, nil, search_icon, nil, search_entry )
 
