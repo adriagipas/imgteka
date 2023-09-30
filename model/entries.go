@@ -187,6 +187,14 @@ func (self *Entries) AddLabelEntry( id int64, label_id int ) error {
 } // end AddLabelEntry
 
 
+func (self *Entries) Filter( query *Query ) {
+
+  self.db.SetQuery ( query )
+  self.reset ()
+  
+} // end Filter
+
+
 func (self *Entries) Get( id int64 ) *Entry {
   return self.v[id]
 } // end Get

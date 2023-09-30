@@ -144,6 +144,102 @@ func initDatabase ( dirs *Dirs ) (*sql.DB,error) {
 } // end initDatabase
 
 
+func (self *Database) buildFilter() (string,[]any) {
+  
+  // Si està buit torna
+  if self.query == nil { return "",nil }
+
+  // Crea query.
+  var args []any= nil
+  query:= ""
+  for or_id,or_qs:= range self.query.OrQueries {
+    tmp:= ""
+    for id,q:= range or_qs.Queries {
+      if id>0 { tmp+= " OR " }
+      switch q.typ {
+      case QUERY_TYPE_NAME_ENTRY:
+        tmp+= " e.name LIKE ? "
+        args= append(args,"%"+q.value+"%")
+        
+      case QUERY_TYPE_LABEL:
+        tmp+= ` EXISTS (
+     SELECT 1
+     FROM ENTRY_LABEL_PAIRS p_el
+     INNER JOIN LABELS l ON p_el.label_id = l.id
+     WHERE e.id = p_el.entry_id AND l.name LIKE ? ) `
+        args= append(args,"%"+q.value+"%")
+
+      case QUERY_TYPE_PLATFORM:
+        tmp+= "( p.short_name LIKE ? OR p.name LIKE ? )"
+        args= append(args,q.value)
+        args= append(args,"%"+q.value+"%")
+        
+      }
+    }
+    if or_id>0 { query+= " AND " }
+    query+= "( " + tmp + " )"
+  }
+  
+  return query,args
+  
+} // end buildFilter
+
+
+func (self *Database) buildLoadEntriesFilter() (string,[]any) {
+  
+  query,args:= self.buildFilter ()
+  if len(args)>0 {
+    query= `
+SELECT e.id,e.name,e.platform_id,e.cover_id
+FROM ENTRIES e
+INNER JOIN PLATFORMS p ON p.id = e.platform_id
+WHERE ` + query + " ORDER BY e.name ASC;"
+  } else {
+    query= ""
+  }
+  
+  return query,args
+  
+} // end buildLoadEntriesFilter
+
+
+func (self *Database) buildGetNumEntriesFilter() (string,[]any) {
+  
+  query,args:= self.buildFilter ()
+  if len(args)>0 {
+    query= `
+SELECT COUNT(*)
+FROM ENTRIES e
+INNER JOIN PLATFORMS p ON p.id = e.platform_id
+WHERE ` + query + ";"
+  } else {
+    query= ""
+  }
+  
+  return query,args
+  
+} // end buildGetNumEntriesFilter
+
+
+func (self *Database) buildGetNumFilesFilter() (string,[]any) {
+  
+  query,args:= self.buildFilter ()
+  if len(args)>0 {
+    query= `
+SELECT COUNT(*)
+FROM ENTRIES e
+INNER JOIN PLATFORMS p ON p.id = e.platform_id
+INNER JOIN FILES f ON f.entry_id = e.id
+WHERE ` + query + ";"
+  } else {
+    query= ""
+  }
+  
+  return query,args
+  
+} // end buildGetNumFilesFilter
+
+
 
 
 /****************/
@@ -153,6 +249,7 @@ func initDatabase ( dirs *Dirs ) (*sql.DB,error) {
 type Database struct {
   conn    *sql.DB
   last_tx *sql.Tx
+  query   *Query
 }
 
 
@@ -166,8 +263,9 @@ func NewDatabase ( dirs *Dirs ) (*Database,error){
   ret:= Database{
     conn    : conn,
     last_tx : nil,
+    query   : nil,
   }
-
+  
   return &ret,nil
   
 } // end NewDatabase
@@ -195,14 +293,21 @@ func (self *Database) CommitLastTransaction() error {
 // filtres de cerca.
 func (self *Database) GetNumEntries() (int64,error) {
 
-    // Consulta base de dades
-  rows,err:= self.conn.Query ( `
+  // Consulta base de dades
+  var rows *sql.Rows
+  var err error
+  query_text,args:= self.buildGetNumEntriesFilter ()
+  if len(args)>0 {
+    rows,err= self.conn.Query ( query_text, args... )
+  } else {
+    rows,err= self.conn.Query ( `
 SELECT COUNT(*)
 FROM ENTRIES;
 ` )
+  }
   if err != nil { return -1,err }
   defer rows.Close ()
-
+  
   // Recorre consulta
   if !rows.Next () {
     return -1,errors.New ( "Error inesperat en Database.GetNumEntries" )
@@ -220,11 +325,18 @@ FROM ENTRIES;
 // filtres de cerca.
 func (self *Database) GetNumFiles() (int64,error) {
 
-    // Consulta base de dades
-  rows,err:= self.conn.Query ( `
+  // Consulta base de dades
+  var rows *sql.Rows
+  var err error
+  query_text,args:= self.buildGetNumFilesFilter ()
+  if len(args)>0 {
+    rows,err= self.conn.Query ( query_text, args... )
+  } else {
+    rows,err= self.conn.Query ( `
 SELECT COUNT(*)
 FROM FILES;
 ` )
+  }
   if err != nil { return -1,err }
   defer rows.Close ()
 
@@ -252,6 +364,16 @@ func (self *Database) RollbackLastTransaction() error {
   return err
   
 } // end RollbackLastTransaction
+
+
+func (self *Database) SetQuery( query *Query ) {
+  
+  self.query= query
+  if len(query.OrQueries)==0 {
+    self.query= nil
+  }
+  
+} // end SetQuery
 
 
 // PLATFORMS ///////////////////////////////////////////////////////////////////
@@ -454,14 +576,21 @@ DELETE FROM ENTRIES WHERE id=?;
 func (self *Database) LoadEntries( entries *Entries ) error {
 
   // Consulta base de dades
-  rows,err:= self.conn.Query ( `
+  var rows *sql.Rows
+  var err error
+  query_text,args:= self.buildLoadEntriesFilter ()
+  if len(args)>0 {
+    rows,err= self.conn.Query ( query_text, args... )
+  } else {
+    rows,err= self.conn.Query ( `
 SELECT id,name,platform_id,cover_id
 FROM ENTRIES
 ORDER BY name ASC;
 ` )
+  }
   if err != nil { return err }
   defer rows.Close ()
-
+  
   // Recorre consulta
   for rows.Next () {
     var id,cover_id int64

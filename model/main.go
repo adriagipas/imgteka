@@ -182,3 +182,11 @@ func (self *Model) RemoveLabel( id int ) error {
 func (self *Model) RemoveEntry( id int64 ) error {
   return self.entries.Remove ( id )
 } // end RemoveEntry
+
+
+func (self *Model) FilterEntries( query string ) {
+
+  q:= NewQuery ( query )
+  self.entries.Filter ( q )
+  
+} // end FilterEntries

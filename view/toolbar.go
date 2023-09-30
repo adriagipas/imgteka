@@ -23,7 +23,6 @@
 package view
 
 import (
-  "fmt"
   
   "fyne.io/fyne/v2"
   "fyne.io/fyne/v2/container"
@@ -61,9 +60,11 @@ func NewToolbar (
   // Crea barra cerca
   search_icon:= widget.NewIcon ( theme.SearchIcon () )
   search_entry:= widget.NewEntry ()
-  search_entry.PlaceHolder= "Cerca...   p.e.: consulta1 + t:MD + l:Lluita"
+  search_entry.PlaceHolder= "Cerca...   p.e.: consulta1 + p:MD + l:Lluita"
   search_entry.OnSubmitted= func(text string) {
-    fmt.Printf ( "CERCA: %s!!!\n", text )
+    model.FilterEntries ( text )
+    list.Update ()
+    status_bar.Update ()
   }
   search_bar:= container.NewBorder ( nil, nil, search_icon, nil, search_entry )
 

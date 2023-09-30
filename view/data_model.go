@@ -233,5 +233,9 @@ type DataModel interface {
   
   // Elimina una etiqueta
   RemoveLabel(id int) error
+
+  // Filtra les entrades d'acord a la consulta. Una cadena buida
+  // implica no filtrar.
+  FilterEntries(query string)
   
 }
