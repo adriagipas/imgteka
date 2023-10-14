@@ -50,6 +50,7 @@ const ID_ROM_NES    = 0x203
 
 const ID_ARCH_ZIP   = 0x300
 
+const ID_EXE_SFZ    = 0x400
 
 
 
@@ -109,6 +110,8 @@ var _IDS []int= []int{
   ID_ROM_MD,
   ID_ROM_NES,
 
+  ID_EXE_SFZ,
+
   ID_ARCH_ZIP,
   
 }
@@ -120,6 +123,7 @@ var _vGBC GBC= GBC{}
 var _vGG GG= GG{}
 var _vMD MD= MD{}
 var _vNES NES= NES{}
+var _vSFZ SFZ= SFZ{}
 var _vZIP ZIP= ZIP{}
 
 
@@ -146,6 +150,9 @@ func Get( id int ) (FileType,error) {
     return &_vMD,nil
   case ID_ROM_NES:
     return &_vNES,nil
+    
+  case ID_EXE_SFZ:
+    return &_vSFZ,nil
 
   case ID_ARCH_ZIP:
     return &_vZIP,nil

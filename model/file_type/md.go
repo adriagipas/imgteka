@@ -344,7 +344,7 @@ func (self *MD) ParseMetadata(
   v= append(v,kv)
 
   // Número serie
-  kv= &KeyValue{"Número de serie",md.TypeSnumber}
+  kv= &KeyValue{"Codi de sèrie",md.TypeSnumber}
   v= append(v,kv)
 
   // Checksum
