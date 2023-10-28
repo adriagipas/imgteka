@@ -27,6 +27,7 @@ import (
   "errors"
   "fmt"
   "image"
+  "io"
   "log"
   "os"
 
@@ -93,7 +94,7 @@ func _SFZ_CheckDataSize( data []byte ) error {
 } // end _SFZ_CheckDataSize
 
 
-func SFZ_ReadMetadata( md *SFZ_Metadata, fd *os.File, size int64 ) error {
+func SFZ_ReadMetadata( md *SFZ_Metadata, fd io.Reader, size int64 ) error {
 
 
   // Comprova grandària no siga 0.

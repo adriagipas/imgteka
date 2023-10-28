@@ -212,14 +212,14 @@ func (self *File) GetImage( max_wh int ) image.Image {
         log.Printf ( "Error al intentar llegir la imatge de '%s': %s",
           self.GetPath (), err )
         ret= nil
-      }
-
-      // Si és molt gran intenta cache
-      bounds:= ret.Bounds ()
-      width:= bounds.Max.X - bounds.Min.X
-      height:= bounds.Max.Y - bounds.Min.Y
-      if width > max_wh || height > max_wh {
-        ret= resizeAndCacheImage ( ret, max_wh, cache_fn )
+      } else {
+        // Si és molt gran intenta cache
+        bounds:= ret.Bounds ()
+        width:= bounds.Max.X - bounds.Min.X
+        height:= bounds.Max.Y - bounds.Min.Y
+        if width > max_wh || height > max_wh {
+          ret= resizeAndCacheImage ( ret, max_wh, cache_fn )
+        }
       }
       
     }
