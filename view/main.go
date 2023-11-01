@@ -41,6 +41,7 @@ func Run ( model DataModel ) error {
   })
   a.Settings ().SetTheme ( &ImgtekaTheme{} ) 
   win:= a.NewWindow ( "imgteka" )
+  win.SetIcon ( resourceIcon256x256Png )
   win.CenterOnScreen ()
 
   // StatusBar
