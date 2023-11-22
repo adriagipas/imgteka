@@ -13,7 +13,10 @@ require (
 	github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646
 )
 
-require github.com/go-text/render v0.0.0-20230619120952-35bccb6164b8 // indirect
+require (
+	github.com/adriagipas/imgcp v0.0.0-20231119165701-f9459d5afab6 // indirect
+	github.com/go-text/render v0.0.0-20230619120952-35bccb6164b8 // indirect
+)
 
 require (
 	fyne.io/systray v1.10.1-0.20230722100817-88df1e0ffa9a // indirect
