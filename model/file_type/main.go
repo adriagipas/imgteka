@@ -25,8 +25,7 @@ package file_type
 import (
   "fmt"
   "image"
-  "os"
-
+  
   "github.com/adriagipas/imgteka/view"
 )
 
@@ -71,7 +70,7 @@ type FileType interface {
   //
   // NOTA! El 'fd' no té perquè estar apuntant al principi del fitxer,
   // però es pot i es deu rebobinar.
-  GetMetadata(fd *os.File) (string,error)
+  GetMetadata(file_name string) (string,error)
 
   // Torna el nom
   GetName() string

@@ -332,12 +332,12 @@ func (self *GBC) GetImage( file_name string) (image.Image,error) {
 } // end GetImage
 
 
-func (self *GBC) GetMetadata(fd *os.File) (string,error) {
+func (self *GBC) GetMetadata(file_name string) (string,error) {
 
-  // Rebobina
-  if _,err:= fd.Seek ( 0, 0 ); err != nil {
-    return "",fmt.Errorf ( "No s'ha pogut obtindre les metadades: %s", err )
-  }
+  // Obri
+  fd,err:= os.Open ( file_name )
+  if err != nil { return "",err }
+  defer fd.Close ()
   
   // Comprova grandària
   info,err:= fd.Stat ()

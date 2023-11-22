@@ -70,13 +70,13 @@ func (self *GG) GetImage( file_name string) (image.Image,error) {
 } // end GetImage
 
 
-func (self *GG) GetMetadata(fd *os.File) (string,error) {
-  
-  // Rebobina
-  if _,err:= fd.Seek ( 0, 0 ); err != nil {
-    return "",fmt.Errorf ( "No s'ha pogut obtindre les metadades: %s", err )
-  }
+func (self *GG) GetMetadata(file_name string) (string,error) {
 
+  // Obri
+  fd,err:= os.Open ( file_name )
+  if err != nil { return "",err }
+  defer fd.Close ()
+  
   // Comprova grandària
   info,err:= fd.Stat ()
   if err != nil {

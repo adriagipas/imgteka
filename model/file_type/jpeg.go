@@ -57,13 +57,13 @@ func (self *JPEG) GetImage( file_name string) (image.Image,error) {
 } // end GetImage
 
 
-func (self *JPEG) GetMetadata(fd *os.File) (string,error) {
+func (self *JPEG) GetMetadata(file_name string) (string,error) {
 
-  // Rebobina
-  if _,err:= fd.Seek ( 0, 0 ); err != nil {
-    return "",fmt.Errorf ( "No s'ha pogut obtindre les metadades: %s", err )
-  }
-
+  // Obri
+  fd,err:= os.Open ( file_name )
+  if err != nil { return "",err }
+  defer fd.Close ()
+  
   // Llig l'imatge
   img,err:= jpeg.Decode ( fd )
   if err != nil {

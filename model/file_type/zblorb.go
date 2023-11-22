@@ -366,7 +366,12 @@ func (self *ZBlorb) GetImage(file_name string) (image.Image,error) {
 } // end GetImage
 
 
-func (self *ZBlorb) GetMetadata(fd *os.File) (string,error) {
+func (self *ZBlorb) GetMetadata(file_name string) (string,error) {
+
+  // Obri
+  fd,err:= os.Open ( file_name )
+  if err != nil { return "",err }
+  defer fd.Close ()
   
   // Llig IFF.
   iff,err:= newIFF ( fd )

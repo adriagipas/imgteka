@@ -187,7 +187,7 @@ func (self *Files) Add(
   pb.Set ( "Comprova tipus i obté metadades...", 0.2 )
   ft,err:= file_type.Get ( ftype )
   if err != nil { return err }
-  md,err:= ft.GetMetadata ( f )
+  md,err:= ft.GetMetadata ( path )
   if err != nil { return err }
   
   // Calcula MD5
