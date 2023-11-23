@@ -124,12 +124,13 @@ func (self *_PS1_Metadata) readId( iso *cdread.ISO ) error {
   wrong_format:= fmt.Errorf ( "format SYSTEM.CNF incorrecte: '%s'", line )
   toks:= strings.Split ( line, "=" )
   if len(toks) != 2 { return wrong_format }
-  toks= strings.Split ( toks[1], "\\" )
+  toks= strings.Split ( toks[1], "cdrom:" )
   if len(toks) != 2 { return wrong_format }
   toks= strings.Split ( toks[1], ";" )
   id:= toks[0]
   id= strings.ReplaceAll ( id, ".", "" )
   id= strings.ReplaceAll ( id, "_", "-" )
+  id= strings.ReplaceAll ( id, "\\", "" )
   self.Id= id
   
   return nil
