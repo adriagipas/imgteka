@@ -39,6 +39,8 @@ import (
 // IDENTIFICADORS
 // MOLT IMPORTANT!!! NO REASSIGNAR IDS. PUC TORNAR-LOS EN L'ORDRE QUE
 // VULLGA, PERÒ NO PUC MODIFICAR ELS IDS.
+const ID_BIN        = 0x000
+
 const ID_IMAGE_PNG  = 0x100
 const ID_IMAGE_JPEG = 0x101
 
@@ -122,6 +124,8 @@ var _IDS []int= []int{
   ID_AUX_CD_PS1,
   
   ID_ARCH_ZIP,
+
+  ID_BIN,
   
 }
 
@@ -137,6 +141,7 @@ var _vZBlorb ZBlorb= ZBlorb{}
 var _vPS1 PS1= PS1{}
 var _vPS1_Aux PS1_Aux= PS1_Aux{}
 var _vZIP ZIP= ZIP{}
+var _vBIN BIN= BIN{}
 
 
 
@@ -175,6 +180,9 @@ func Get( id int ) (FileType,error) {
     
   case ID_ARCH_ZIP:
     return &_vZIP,nil
+
+  case ID_BIN:
+    return &_vBIN,nil
     
   default:
     return nil,fmt.Errorf ( "Tipus de fitxer desconegut:", id )
