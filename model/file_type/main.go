@@ -57,6 +57,7 @@ const ID_EXE_ZBLORB = 0x401
 const ID_AUX_CD_PS1 = 0x500
 
 const ID_CD_PS1     = 0x600
+const ID_UMD_PSP    = 0x601
 
 
 
@@ -122,6 +123,7 @@ var _IDS []int= []int{
 
   ID_CD_PS1,
   ID_AUX_CD_PS1,
+  ID_UMD_PSP,
   
   ID_ARCH_ZIP,
 
@@ -140,6 +142,7 @@ var _vSFZ SFZ= SFZ{}
 var _vZBlorb ZBlorb= ZBlorb{}
 var _vPS1 PS1= PS1{}
 var _vPS1_Aux PS1_Aux= PS1_Aux{}
+var _vPSP PSP= PSP{}
 var _vZIP ZIP= ZIP{}
 var _vBIN BIN= BIN{}
 
@@ -177,6 +180,8 @@ func Get( id int ) (FileType,error) {
     return &_vPS1,nil
   case ID_AUX_CD_PS1:
     return &_vPS1_Aux,nil
+  case ID_UMD_PSP:
+    return &_vPSP,nil
     
   case ID_ARCH_ZIP:
     return &_vZIP,nil

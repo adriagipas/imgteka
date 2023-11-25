@@ -245,7 +245,7 @@ func (self *PS1) ParseMetadata(
   // Parseja
   md:= _PS1_Metadata{}
   if err:= json.Unmarshal ( []byte(meta_data), &md ); err != nil {
-    log.Printf ( "[MD] no s'ha pogut parsejar '%s': %s", meta_data, err )
+    log.Printf ( "[PS1] no s'ha pogut parsejar '%s': %s", meta_data, err )
     return v
   }
   
