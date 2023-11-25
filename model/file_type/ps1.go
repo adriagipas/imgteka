@@ -76,11 +76,12 @@ func (self *_PS1_Metadata) readRegion( cd cdread.CD ) error {
 
   // Comprova llicència
   tmp:= string(buf[:60])
-  if tmp != "          Licensed  by          Sony Computer Entertainment " {
+  if tmp != "          Licensed  by          Sony Computer Entertainment " &&
+    tmp != "          Licensed  by          Sony Computer Entertainment(" {
     return fmt.Errorf ( "la imatge no conté la llicència esperada: '%s'", tmp )
   }
   region:= string(buf[60:])
-  if region == "Euro pe   " {
+  if region == "Euro pe   " || region[:6] == "Europe" {
     self.Region= _PS1_REGION_EUROPE
   } else if region == "Amer  ica " {
     self.Region= _PS1_REGION_AMERICA
@@ -131,7 +132,7 @@ func (self *_PS1_Metadata) readId( iso *cdread.ISO ) error {
   id= strings.ReplaceAll ( id, ".", "" )
   id= strings.ReplaceAll ( id, "_", "-" )
   id= strings.ReplaceAll ( id, "\\", "" )
-  self.Id= id
+  self.Id= strings.ToUpper ( id )
   
   return nil
   
