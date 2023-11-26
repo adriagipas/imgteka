@@ -50,6 +50,7 @@ const ID_ROM_MD     = 0x202
 const ID_ROM_NES    = 0x203
 
 const ID_ARCH_ZIP   = 0x300
+const ID_ARCH_TAR   = 0x301
 
 const ID_EXE_SFZ    = 0x400
 const ID_EXE_ZBLORB = 0x401
@@ -126,6 +127,7 @@ var _IDS []int= []int{
   ID_UMD_PSP,
   
   ID_ARCH_ZIP,
+  ID_ARCH_TAR,
 
   ID_BIN,
   
@@ -144,6 +146,7 @@ var _vPS1 PS1= PS1{}
 var _vPS1_Aux PS1_Aux= PS1_Aux{}
 var _vPSP PSP= PSP{}
 var _vZIP ZIP= ZIP{}
+var _vTAR TAR= TAR{}
 var _vBIN BIN= BIN{}
 
 
@@ -185,7 +188,9 @@ func Get( id int ) (FileType,error) {
     
   case ID_ARCH_ZIP:
     return &_vZIP,nil
-
+  case ID_ARCH_TAR:
+    return &_vTAR,nil
+    
   case ID_BIN:
     return &_vBIN,nil
     
