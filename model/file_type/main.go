@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Adrià Giménez Pastor.
+ * Copyright 2023-2024 Adrià Giménez Pastor.
  *
  * This file is part of adriagipas/imgteka.
  *
@@ -59,6 +59,7 @@ const ID_AUX_CD_PS1 = 0x500
 
 const ID_CD_PS1     = 0x600
 const ID_UMD_PSP    = 0x601
+const ID_DVD_PS2    = 0x602
 
 
 
@@ -124,6 +125,7 @@ var _IDS []int= []int{
 
   ID_CD_PS1,
   ID_AUX_CD_PS1,
+  ID_DVD_PS2,
   ID_UMD_PSP,
   
   ID_ARCH_ZIP,
@@ -144,6 +146,7 @@ var _vSFZ SFZ= SFZ{}
 var _vZBlorb ZBlorb= ZBlorb{}
 var _vPS1 PS1= PS1{}
 var _vPS1_Aux PS1_Aux= PS1_Aux{}
+var _vPS2 PS2= PS2{}
 var _vPSP PSP= PSP{}
 var _vZIP ZIP= ZIP{}
 var _vTAR TAR= TAR{}
@@ -183,6 +186,8 @@ func Get( id int ) (FileType,error) {
     return &_vPS1,nil
   case ID_AUX_CD_PS1:
     return &_vPS1_Aux,nil
+  case ID_DVD_PS2:
+    return &_vPS2,nil
   case ID_UMD_PSP:
     return &_vPSP,nil
     
