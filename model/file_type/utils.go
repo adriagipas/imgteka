@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Adrià Giménez Pastor.
+ * Copyright 2023-2024 Adrià Giménez Pastor.
  *
  * This file is part of adriagipas/imgteka.
  *
@@ -23,11 +23,13 @@
 package file_type
 
 import (
+  "bytes"
   "errors"
   "fmt"
   "io"
   "os"
   "strconv"
+  "strings"
   
   "github.com/adriagipas/imgcp/cdread"
   "github.com/adriagipas/imgteka/view"
@@ -38,6 +40,16 @@ import (
 /************/
 /* FUNCIONS */
 /************/
+
+func BytesToStr_trim_0s( data []byte ) string {
+  
+  data= bytes.TrimRight ( data, "\000" )
+  ret:= string(data)
+  
+  return strings.TrimSpace ( ret )
+  
+} // end BytesToStr_trim_0s
+
 
 func NumBytesToStr(num_bytes uint64) string {
   if num_bytes > 1024*1024*1024 { // G

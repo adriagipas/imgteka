@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Adrià Giménez Pastor.
+ * Copyright 2023-2024 Adrià Giménez Pastor.
  *
  * This file is part of adriagipas/imgteka.
  *
@@ -23,7 +23,6 @@
 package file_type
 
 import (
-  "bytes"
   "encoding/json"
   "errors"
   "fmt"
@@ -31,7 +30,6 @@ import (
   "log"
   "math"
   "os"
-  "strings"
   
   "github.com/adriagipas/imgteka/view"
   "golang.org/x/text/encoding/japanese"
@@ -75,16 +73,6 @@ type _MD_Metadata struct {
 }
 
 
-func _MD_b2s( data []byte ) string {
-
-  data= bytes.TrimSuffix ( data, []byte{0x00} )
-  ret:= string(data)
-
-  return strings.TrimSpace ( ret )
-  
-} // end _MD_b2s
-
-
 func _MD_CalcChecksum( data []byte ) uint16 {
 
   var ret uint16= 0
@@ -99,39 +87,39 @@ func _MD_CalcChecksum( data []byte ) uint16 {
 
 
 func _MD_ReadHeader( header *_MD_Metadata, data []byte ) {
-
+  
   // Nom de la consola
-  header.Console= _MD_b2s ( data[0x100:0x100+16] )
+  header.Console= BytesToStr_trim_0s ( data[0x100:0x100+16] )
 
   // Signatura i data
-  header.FirmBuild= _MD_b2s ( data[0x110:0x110+16] )
+  header.FirmBuild= BytesToStr_trim_0s ( data[0x110:0x110+16] )
 
   // Nom domèstic
   buf:= data[0x120:0x120+48]
   dec:= japanese.ShiftJIS.NewDecoder ()
   if aux,err:= dec.Bytes ( buf ); err != nil {
-    header.DomName= _MD_b2s ( buf )
+    header.DomName= BytesToStr_trim_0s ( buf )
   } else {
-    header.DomName= _MD_b2s ( aux )
+    header.DomName= BytesToStr_trim_0s ( aux )
   }
 
   // Nom internacional
   buf= data[0x150:0x150+48]
   if aux,err:= dec.Bytes ( buf ); err != nil {
-    header.IntName= _MD_b2s ( buf )
+    header.IntName= BytesToStr_trim_0s ( buf )
   } else {
-    header.IntName= _MD_b2s ( aux )
+    header.IntName= BytesToStr_trim_0s ( aux )
   }
 
   // Tipus de programa i número série
-  header.TypeSnumber= _MD_b2s ( data[0x180:0x180+14] )
+  header.TypeSnumber= BytesToStr_trim_0s ( data[0x180:0x180+14] )
 
   // Checksum
   header.Checksum= (uint16(data[0x18e])<<8) | uint16(data[0x18f])
   header.RealChecksum= _MD_CalcChecksum ( data )
 
   // Support I/O
-  header.IO= _MD_b2s ( data[0x190:0x190+16] )
+  header.IO= BytesToStr_trim_0s ( data[0x190:0x190+16] )
 
   // Inici ROM
   header.Start= (uint32(data[0x1a0])<<24) | (uint32(data[0x1a1])<<16) |
@@ -186,10 +174,10 @@ func _MD_ReadHeader( header *_MD_Metadata, data []byte ) {
   }
 
   // Suport modem
-  header.Modem= _MD_b2s ( data[0x1bc:0x1bc+12] )
+  header.Modem= BytesToStr_trim_0s ( data[0x1bc:0x1bc+12] )
   
   // Codi paisos
-  header.CCodes= _MD_b2s ( data[0x1f0:0x1f0+3] )
+  header.CCodes= BytesToStr_trim_0s ( data[0x1f0:0x1f0+3] )
   
 } // end _MD_ReadHeader
 
