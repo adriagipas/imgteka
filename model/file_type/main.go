@@ -55,6 +55,7 @@ const ID_ARCH_TAR   = 0x301
 
 const ID_EXE_SFZ    = 0x400
 const ID_EXE_ZBLORB = 0x401
+const ID_EXE_CXI    = 0x402
 
 const ID_AUX_CD_PS1 = 0x500
 
@@ -122,9 +123,10 @@ var _IDS []int= []int{
   ID_ROM_NES,
   ID_ROM_NDS,
 
+  ID_EXE_CXI,
   ID_EXE_SFZ,
   ID_EXE_ZBLORB,
-
+  
   ID_CD_PS1,
   ID_AUX_CD_PS1,
   ID_DVD_PS2,
@@ -145,6 +147,7 @@ var _vGG GG= GG{}
 var _vMD MD= MD{}
 var _vNES NES= NES{}
 var _vNDS NDS= NDS{}
+var _vCXI CXI= CXI{}
 var _vSFZ SFZ= SFZ{}
 var _vZBlorb ZBlorb= ZBlorb{}
 var _vPS1 PS1= PS1{}
@@ -181,7 +184,9 @@ func Get( id int ) (FileType,error) {
     return &_vNES,nil
   case ID_ROM_NDS:
     return &_vNDS,nil
-    
+
+  case ID_EXE_CXI:
+    return &_vCXI,nil
   case ID_EXE_SFZ:
     return &_vSFZ,nil
   case ID_EXE_ZBLORB:

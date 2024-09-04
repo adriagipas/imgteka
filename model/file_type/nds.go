@@ -126,8 +126,8 @@ func (self *_NDS_Icon) Bounds() image.Rectangle {
       Y:0,
     },
     Max:image.Point{
-      X:31,
-      Y:31,
+      X:32,
+      Y:32,
     },
   }
 } // end _NDS_Icon.Bounds
