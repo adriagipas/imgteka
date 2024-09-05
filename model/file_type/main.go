@@ -49,6 +49,7 @@ const ID_ROM_GBC    = 0x201
 const ID_ROM_MD     = 0x202
 const ID_ROM_NES    = 0x203
 const ID_ROM_NDS    = 0x204
+const ID_ROM_3DS    = 0x205
 
 const ID_ARCH_ZIP   = 0x300
 const ID_ARCH_TAR   = 0x301
@@ -122,6 +123,7 @@ var _IDS []int= []int{
   ID_ROM_MD,
   ID_ROM_NES,
   ID_ROM_NDS,
+  ID_ROM_3DS,
 
   ID_EXE_CXI,
   ID_EXE_SFZ,
@@ -147,6 +149,7 @@ var _vGG GG= GG{}
 var _vMD MD= MD{}
 var _vNES NES= NES{}
 var _vNDS NDS= NDS{}
+var _v3DS N3DS= N3DS{}
 var _vCXI CXI= CXI{}
 var _vSFZ SFZ= SFZ{}
 var _vZBlorb ZBlorb= ZBlorb{}
@@ -174,6 +177,8 @@ func Get( id int ) (FileType,error) {
   case ID_IMAGE_JPEG:
     return &_vJPEG,nil
 
+  case ID_ROM_3DS:
+    return &_v3DS,nil
   case ID_ROM_GBC:
     return &_vGBC,nil
   case ID_ROM_GG:
@@ -184,7 +189,7 @@ func Get( id int ) (FileType,error) {
     return &_vNES,nil
   case ID_ROM_NDS:
     return &_vNDS,nil
-
+    
   case ID_EXE_CXI:
     return &_vCXI,nil
   case ID_EXE_SFZ:

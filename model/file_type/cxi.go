@@ -394,7 +394,7 @@ func (self *_CXI_Metadata) ParseMetadata(
   var kv *KeyValue
   
   // NCCH Header
-  kv= &KeyValue{"Grandària capçalera",NumBytesToStr(uint64(self.Header.Size))}
+  kv= &KeyValue{"Grandària (capçalera)",NumBytesToStr(uint64(self.Header.Size))}
   v= append(v,kv)
   kv= &KeyValue{"Identificador",fmt.Sprintf("%016x",self.Header.Id)}
   v= append(v,kv)
