@@ -61,8 +61,8 @@ type _FAT12_Metadata struct {
 
 func (self *_FAT12_Metadata) Read( data []byte ) error {
 
-  // Comprova que és un boot sector.
-  if data[0]!=0xe9 && (data[0]!=0xeb || data[2]!=0x90) {
+  // Comprova que és un boot sector. He relaxat les condicions.
+  if data[0]!=0xe9 && (data[0]!=0xeb /*|| data[2]!=0x90*/) {
     return errors.New ( "El primer sector no és executable" )
   }
 
