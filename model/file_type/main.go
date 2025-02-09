@@ -63,6 +63,7 @@ const ID_AUX_CD_PS1 = 0x500
 const ID_CD_PS1     = 0x600
 const ID_UMD_PSP    = 0x601
 const ID_DVD_PS2    = 0x602
+const ID_CD_ISO     = 0x603
 
 const ID_FLP_FAT12  = 0x700
 
@@ -134,11 +135,12 @@ var _IDS []int= []int{
   ID_EXE_CXI,
   ID_EXE_SFZ,
   ID_EXE_ZBLORB,
-  
+
   ID_CD_PS1,
   ID_AUX_CD_PS1,
   ID_DVD_PS2,
   ID_UMD_PSP,
+  ID_CD_ISO,
   
   ID_ARCH_ZIP,
   ID_ARCH_TAR,
@@ -166,6 +168,7 @@ var _vPS1 PS1= PS1{}
 var _vPS1_Aux PS1_Aux= PS1_Aux{}
 var _vPS2 PS2= PS2{}
 var _vPSP PSP= PSP{}
+var _vISO ISO= ISO{}
 var _vZIP ZIP= ZIP{}
 var _vTAR TAR= TAR{}
 var _vFAT12 FAT12= FAT12{}
@@ -218,6 +221,8 @@ func Get( id int ) (FileType,error) {
     return &_vPS2,nil
   case ID_UMD_PSP:
     return &_vPSP,nil
+  case ID_CD_ISO:
+    return &_vISO,nil
     
   case ID_ARCH_ZIP:
     return &_vZIP,nil
