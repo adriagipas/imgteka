@@ -66,6 +66,8 @@ const ID_DVD_PS2    = 0x602
 
 const ID_FLP_FAT12  = 0x700
 
+const ID_DOC_PDF    = 0x800
+
 
 
 
@@ -120,6 +122,8 @@ var _IDS []int= []int{
   ID_IMAGE_PNG,
   ID_IMAGE_JPEG,
 
+  ID_DOC_PDF,
+  
   ID_ROM_GBC,
   ID_ROM_GG,
   ID_ROM_MD,
@@ -148,6 +152,7 @@ var _IDS []int= []int{
 // Tipus globals
 var _vPNG PNG= PNG{}
 var _vJPEG JPEG= JPEG{}
+var _vPDF PDF= PDF{}
 var _vGBC GBC= GBC{}
 var _vGG GG= GG{}
 var _vMD MD= MD{}
@@ -182,6 +187,9 @@ func Get( id int ) (FileType,error) {
   case ID_IMAGE_JPEG:
     return &_vJPEG,nil
 
+  case ID_DOC_PDF:
+    return &_vPDF,nil
+    
   case ID_ROM_3DS:
     return &_v3DS,nil
   case ID_ROM_GBC:
