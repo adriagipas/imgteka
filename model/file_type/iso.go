@@ -53,6 +53,38 @@ type _CDISO_Metadata struct {
 /* PART PÚBLICA */
 /****************/
 
+// Fitxers auxiliars que s'ha de guardar en el mateix lloc.
+type ISO_Aux struct {
+}
+
+
+func (self *ISO_Aux) GetImage( file_name string ) (image.Image,error) {
+  return nil,fmt.Errorf (
+    "No es pot interpretar com una imatge una imatge cd CD ISO-9660" )
+} // end GetImage
+
+
+func (self *ISO_Aux) GetMetadata(file_name string) (string,error) {
+  return "",nil
+} // end GetMetadata
+
+
+func (self *ISO_Aux) GetName() string {
+  return "Fitxer auxiliar d'imatge de CD ISO-9660" }
+func (self *ISO_Aux) GetShortName() string { return "ISO" }
+func (self *ISO_Aux) IsImage() bool { return false }
+
+
+func (self *ISO_Aux) ParseMetadata(
+
+  v         []view.StringPair,
+  meta_data string,
+
+) []view.StringPair {
+  return v
+} // end ParseMetadata
+
+
 type ISO struct {
 }
 
