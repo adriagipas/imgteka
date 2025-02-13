@@ -11,7 +11,7 @@ require github.com/godbus/dbus/v5 v5.1.0
 require github.com/adrg/xdg v0.5.3
 
 require (
-	github.com/adriagipas/imgcp v0.0.0-20250212225634-3672e319dbb0
+	github.com/adriagipas/imgcp v0.0.0-20250213205053-0cc78e29be6d
 	github.com/mattn/go-sqlite3 v1.14.24
 	github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646
 	seehuhn.de/go/pdf v0.5.0
